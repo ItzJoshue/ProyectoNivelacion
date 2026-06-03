@@ -1,6 +1,6 @@
-from Modulos.personas import Profesor, Estudiante
-from Modulos.infraestructura import Aula, Horario, Cronograma
-from Modulos.universidad import CursoNivelacion, Matricula
+from modulos.personas import Profesor, Estudiante
+from modulos.infraestructura import Aula, Horario, Cronograma
+from modulos.universidad import CursoNivelacion, Matricula
 
 # Almacenamiento temporal (Base de datos en memoria)
 aulas = []
