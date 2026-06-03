@@ -1,4 +1,4 @@
-from personas import Estudiante
+from .personas import Estudiante
 
 class CursoNivelacion:
     def __init__(self, carrera, materia1, materia2):
