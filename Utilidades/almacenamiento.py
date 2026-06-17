@@ -3,8 +3,8 @@ import uuid
 from pathlib import Path
 from tkinter import messagebox
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "datos"
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "Datos"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 ARCHIVOS = {
