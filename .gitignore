@@ -11,3 +11,6 @@ venv/
 
 # Archivos temporales
 *.log
+
+# Datos persistentes JSON (generados en runtime)
+Datos/*.json

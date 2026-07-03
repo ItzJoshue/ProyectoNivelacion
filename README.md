@@ -60,3 +60,52 @@ Las siguientes funcionalidades no forman parte de esta versión:
 El proyecto se desarrollará mediante trabajo colaborativo, asignando responsabilidades específicas a cada integrante del equipo, incluyendo desarrollo, documentación y coordinación.
 
 La comunicación se mantendrá mediante reuniones periódicas y herramientas de colaboración, garantizando una participación equitativa y una adecuada coordinación durante todas las etapas del proyecto.
+
+## Estructura del proyecto (main unificado)
+
+```
+ProyectoNivelacion/
+├── Main.py
+├── Datos/                    # Persistencia JSON (estudiantes, usuarios, aulas…)
+├── domain/                   # Entidades POO + interfaces ABC
+│   ├── entidades/
+│   └── interfaces/
+├── factories/                # Factory Method
+├── infraestructura/          # Repositorios JSON, Excel, utilidades
+├── servicios/                # Lógica de negocio + inyección de dependencias
+└── Vistas/
+    ├── autenticacion/        # Login y registro
+    ├── paneles/              # Panel docente / panel estudiante
+    └── frames/               # Vistas CRUD y reportes
+```
+
+Integra el código de la rama `Modulosss` (aulas, cursos, matrículas, postulantes, reportes) con la arquitectura POO/SOLID de `main`.
+
+## Autenticación y roles
+
+1. **Registrarse** como estudiante o docente (crea cuenta + perfil académico).
+2. **Iniciar sesión** con cédula y contraseña.
+3. **Panel Docente**: acceso completo (estudiantes, materias, calificaciones, aulas, cursos, postulantes, matrículas, reportes, Excel).
+4. **Panel Estudiante**: solo ve su perfil, calificaciones y matrículas propias.
+
+## Conceptos POO documentados en código
+
+| Concepto | Ubicación |
+|----------|-----------|
+| Encapsulamiento + `@property` | `domain/entidades/` |
+| Herencia + polimorfismo (ABC) | `domain/entidades/persona.py` |
+| Factory Method | `factories/persona_factory.py` |
+| Interfaces ABC (SOLID - I, D) | `domain/interfaces/` |
+| Inyección de dependencias | `servicios/contenedor.py`, `servicios/gestor_academico.py` |
+| Composition Root | `servicios/contenedor.py` → `crear_contenedor()` |
+
+## Instalación y ejecución
+
+```bash
+pip install -r requirements.txt
+python Main.py
+```
+
+## Importar / exportar estudiantes (Excel)
+
+Disponible en el **Panel Docente → Estudiantes**. Columnas: `cedula`, `nombre`, `apellido`, `carrera`, `email`.
