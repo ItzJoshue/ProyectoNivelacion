@@ -3,19 +3,36 @@ from tkinter import messagebox, ttk
 
 from infraestructura.utilidades.almacenamiento import DATA_DIR
 from servicios.matricula_servicio import MatriculaServicio
+from Vistas.ui.components import Card, SPACE_MD, button_row, page_header, styled_text
 
 
 class ReporteFrame(ttk.Frame):
     def __init__(self, parent: tk.Widget, matricula: MatriculaServicio) -> None:
-        super().__init__(parent, padding=10)
+        super().__init__(parent, style="Content.TFrame")
         self.matricula = matricula
-        ttk.Label(self, text="Reportes", font=("Segoe UI", 14, "bold")).pack(anchor=tk.W, pady=(0, 10))
-        btns = ttk.Frame(self)
-        btns.pack(fill=tk.X)
-        ttk.Button(btns, text="Generar reporte", command=self._generar).pack(side=tk.LEFT, padx=4)
-        ttk.Button(btns, text="Ver carpeta de datos", command=self._ruta).pack(side=tk.LEFT, padx=4)
-        self.texto = tk.Text(self, height=22, wrap=tk.WORD)
-        self.texto.pack(fill=tk.BOTH, expand=True, pady=8)
+
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
+
+        page_header(self, "Reportes", "Genere y consulte reportes del sistema").grid(row=0, column=0, sticky="ew")
+
+        acciones_card = Card(self, title="Acciones")
+        acciones_card.grid(row=1, column=0, sticky="ew", pady=(0, SPACE_MD))
+        button_row(
+            acciones_card.body,
+            [
+                ("Generar reporte", self._generar, "primary"),
+                ("Ver carpeta de datos", self._ruta, "secondary"),
+            ],
+        ).pack(anchor=tk.W)
+
+        preview_card = Card(self, title="Vista previa del reporte")
+        preview_card.grid(row=2, column=0, sticky="nsew")
+        preview_card.body.rowconfigure(0, weight=1)
+        preview_card.body.columnconfigure(0, weight=1)
+
+        self.texto = styled_text(preview_card.body, height=22, wrap=tk.WORD)
+        self.texto.grid(row=0, column=0, sticky="nsew")
 
     def _generar(self) -> None:
         self.texto.delete("1.0", tk.END)

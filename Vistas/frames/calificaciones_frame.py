@@ -2,31 +2,65 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from servicios.gestor_academico import GestorAcademico
+from Vistas.ui.components import Card, SPACE_MD, button_row, form_field, page_header, styled_text
 
 
 class CalificacionesFrame(ttk.Frame):
     def __init__(self, parent: tk.Widget, gestor: GestorAcademico) -> None:
-        super().__init__(parent, padding=10)
+        super().__init__(parent, style="Content.TFrame")
         self.gestor = gestor
         self.var_cedula = tk.StringVar()
         self.var_materia = tk.StringVar()
         self.var_nota = tk.StringVar()
 
-        form = ttk.LabelFrame(self, text="Registrar calificación", padding=10)
-        form.pack(fill=tk.X, pady=(0, 10))
-        for i, (lbl, var) in enumerate(
-            [
-                ("Cédula:", self.var_cedula),
-                ("Materia:", self.var_materia),
-                ("Nota (0-10):", self.var_nota),
-            ]
-        ):
-            ttk.Label(form, text=lbl).grid(row=i, column=0, sticky=tk.W, pady=3)
-            ttk.Entry(form, textvariable=var, width=30).grid(row=i, column=1, padx=8, pady=3)
-        ttk.Button(form, text="Guardar", command=self._guardar).grid(row=3, column=0, columnspan=2, pady=8)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
 
-        self.texto = tk.Text(self, height=20, wrap=tk.WORD)
-        self.texto.pack(fill=tk.BOTH, expand=True)
+        page_header(self, "Calificaciones", "Registre notas y consulte el rendimiento académico").grid(
+            row=0, column=0, sticky="ew"
+        )
+
+        form_card = Card(self, title="Registrar calificación")
+        form_card.grid(row=1, column=0, sticky="ew", pady=(0, SPACE_MD))
+        form_card.body.columnconfigure(0, weight=1)
+        form_card.body.columnconfigure(1, weight=1)
+        form_card.body.columnconfigure(2, weight=1)
+
+        cedula_frame, _ = form_field(
+            form_card.body,
+            "Cédula del estudiante",
+            self.var_cedula,
+            width=22
+        )
+        cedula_frame.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+
+        materia_frame, _ = form_field(
+            form_card.body,
+            "Materia",
+            self.var_materia,
+            width=22
+        )
+        materia_frame.grid(row=0, column=1, sticky="ew", padx=8)
+
+        nota_frame, _ = form_field(
+            form_card.body,
+            "Nota (0-10)",
+            self.var_nota,
+            width=22
+        )
+        nota_frame.grid(row=0, column=2, sticky="ew", padx=(8, 0))
+
+        acciones = ttk.Frame(form_card.body, style="Card.TFrame")
+        acciones.grid(row=1, column=0, columnspan=3, sticky="w", pady=(4, 0))
+        button_row(acciones, [("Guardar calificación", self._guardar, "primary")]).pack(anchor=tk.W)
+
+        resumen_card = Card(self, title="Resumen de estudiantes")
+        resumen_card.grid(row=2, column=0, sticky="nsew")
+        resumen_card.body.rowconfigure(0, weight=1)
+        resumen_card.body.columnconfigure(0, weight=1)
+
+        self.texto = styled_text(resumen_card.body, height=20, wrap=tk.WORD)
+        self.texto.grid(row=0, column=0, sticky="nsew")
         self.refrescar()
 
     def refrescar(self) -> None:

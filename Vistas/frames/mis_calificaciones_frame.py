@@ -3,23 +3,49 @@ from tkinter import ttk
 
 from servicios.autenticacion_servicio import AutenticacionServicio
 from servicios.matricula_servicio import MatriculaServicio
+from Vistas.ui.components import Card, SPACE_MD, create_treeview, insertar_filas, page_header, styled_text
 
 
 class MisCalificacionesFrame(ttk.Frame):
     """Vista restringida: solo las calificaciones del estudiante autenticado."""
 
-    def __init__(self, parent: tk.Widget, cedula: str, auth: AutenticacionServicio, matricula: MatriculaServicio) -> None:
-        super().__init__(parent, padding=16)
+    def __init__(
+        self,
+        parent: tk.Widget,
+        cedula: str,
+        auth: AutenticacionServicio,
+        matricula: MatriculaServicio,
+    ) -> None:
+        super().__init__(parent, style="Content.TFrame")
         self.cedula = cedula
         self.auth = auth
         self.matricula = matricula
-        ttk.Label(self, text="Mis calificaciones", font=("Segoe UI", 14, "bold")).pack(anchor=tk.W, pady=(0, 10))
-        self.tabla = ttk.Treeview(self, columns=("materia", "nota"), show="headings", height=10)
-        self.tabla.heading("materia", text="Materia")
-        self.tabla.heading("nota", text="Nota")
-        self.tabla.pack(fill=tk.X, pady=(0, 12))
-        self.texto = tk.Text(self, height=10, wrap=tk.WORD)
-        self.texto.pack(fill=tk.BOTH, expand=True)
+
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
+
+        page_header(self, "Mis calificaciones", "Consulte su rendimiento académico").grid(row=0, column=0, sticky="ew")
+
+        tabla_card = Card(self, title="Calificaciones por materia")
+        tabla_card.grid(row=1, column=0, sticky="ew", pady=(0, SPACE_MD))
+        tabla_card.body.columnconfigure(0, weight=1)
+
+        self.tabla, tree_wrap = create_treeview(
+            tabla_card.body,
+            ("materia", "nota"),
+            {"materia": "Materia", "nota": "Nota"},
+            height=8,
+            col_width=200,
+        )
+        tree_wrap.grid(row=0, column=0, sticky="ew")
+
+        info_card = Card(self, title="Resumen académico")
+        info_card.grid(row=2, column=0, sticky="nsew")
+        info_card.body.rowconfigure(0, weight=1)
+        info_card.body.columnconfigure(0, weight=1)
+
+        self.texto = styled_text(info_card.body, height=10, wrap=tk.WORD)
+        self.texto.grid(row=0, column=0, sticky="nsew")
         self.refrescar()
 
     def refrescar(self) -> None:
@@ -32,8 +58,8 @@ class MisCalificacionesFrame(ttk.Frame):
         if estudiante is None:
             self.texto.insert(tk.END, "Sin datos académicos.")
         else:
-            for materia, nota in estudiante.calificaciones.items():
-                self.tabla.insert("", tk.END, values=(materia, nota))
+            filas = [(materia, nota) for materia, nota in estudiante.calificaciones.items()]
+            insertar_filas(self.tabla, filas)
             self.texto.insert(tk.END, f"Promedio general: {estudiante.promedio}\n\n")
             cursos = {c.id: c.nombre for c in self.matricula.listar_cursos()}
             for m in self.matricula.matriculas_de_estudiante(self.cedula):

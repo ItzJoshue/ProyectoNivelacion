@@ -2,6 +2,15 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from infraestructura.utilidades.almacenamiento import guardar_json, leer_json, nuevo_id
+from Vistas.ui.components import (
+    Card,
+    SPACE_MD,
+    button_row,
+    create_treeview,
+    form_field,
+    insertar_filas,
+    page_header,
+)
 
 
 class CrudJsonFrame(ttk.Frame):
@@ -15,41 +24,68 @@ class CrudJsonFrame(ttk.Frame):
         campos: list[str],
         columnas: list[str],
     ) -> None:
-        super().__init__(parent, padding=10)
+        super().__init__(parent, style="Content.TFrame")
         self.archivo = archivo
         self.campos = campos
         self.columnas = columnas
         self.vars: dict[str, tk.StringVar] = {}
         self.id_sel: str | None = None
 
-        ttk.Label(self, text=titulo, font=("Segoe UI", 14, "bold")).pack(anchor=tk.W, pady=(0, 10))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
 
-        form = ttk.LabelFrame(self, text="Formulario", padding=10)
-        form.pack(fill=tk.X, pady=(0, 8))
+        page_header(self, titulo, "Gestione los registros del módulo").grid(row=0, column=0, sticky="ew")
+
+        form_card = Card(self, title="Formulario")
+        form_card.grid(row=1, column=0, sticky="ew", pady=(0, SPACE_MD))
+        cols_per_row = min(3, max(1, len(campos)))
+        for col_i in range(cols_per_row):
+            form_card.body.columnconfigure(col_i, weight=1)
+
         for i, c in enumerate(campos):
-            ttk.Label(form, text=c.capitalize()).grid(row=i, column=0, sticky=tk.W, pady=3)
             var = tk.StringVar()
             self.vars[c] = var
-            ttk.Entry(form, textvariable=var, width=40).grid(row=i, column=1, padx=8, pady=3)
+            container, _ = form_field(form_card.body, c.capitalize(), var, width=24)
+            container.grid(
+                row=i // cols_per_row,
+                column=i % cols_per_row,
+                sticky="ew",
+                padx=(0, 8) if i % cols_per_row != cols_per_row - 1 else 0,
+            )
 
-        btns = ttk.Frame(form)
-        btns.grid(row=len(campos), column=0, columnspan=2, pady=8)
-        for txt, cmd in [("Guardar", self._guardar), ("Actualizar", self._actualizar), ("Eliminar", self._eliminar), ("Limpiar", self._limpiar)]:
-            ttk.Button(btns, text=txt, command=cmd).pack(side=tk.LEFT, padx=4)
+        acciones = ttk.Frame(form_card.body, style="Card.TFrame")
+        acciones.grid(row=(len(campos) + cols_per_row - 1) // cols_per_row, column=0, columnspan=cols_per_row, sticky="w", pady=(8, 0))
+        button_row(
+            acciones,
+            [
+                ("Guardar", self._guardar, "primary"),
+                ("Actualizar", self._actualizar, "secondary"),
+                ("Eliminar", self._eliminar, "danger"),
+                ("Limpiar", self._limpiar, "secondary"),
+            ],
+        ).pack(anchor=tk.W)
 
-        self.tabla = ttk.Treeview(self, columns=columnas, show="headings", height=12)
-        for col in columnas:
-            self.tabla.heading(col, text=col.upper())
-            self.tabla.column(col, width=130)
-        self.tabla.pack(fill=tk.BOTH, expand=True)
+        tabla_card = Card(self, title="Registros")
+        tabla_card.grid(row=2, column=0, sticky="nsew")
+        tabla_card.body.rowconfigure(0, weight=1)
+        tabla_card.body.columnconfigure(0, weight=1)
+
+        self.tabla, tree_wrap = create_treeview(
+            tabla_card.body,
+            tuple(columnas),
+            {c: c.upper() for c in columnas},
+            height=14,
+            col_width=130,
+        )
+        tree_wrap.grid(row=0, column=0, sticky="nsew")
         self.tabla.bind("<<TreeviewSelect>>", self._seleccionar)
         self.refrescar()
 
     def refrescar(self) -> None:
         for i in self.tabla.get_children():
             self.tabla.delete(i)
-        for reg in leer_json(self.archivo):
-            self.tabla.insert("", tk.END, values=[reg.get(c, "") for c in self.columnas])
+        filas = [[reg.get(c, "") for c in self.columnas] for reg in leer_json(self.archivo)]
+        insertar_filas(self.tabla, [tuple(f) for f in filas])
 
     def _seleccionar(self, _=None) -> None:
         sel = self.tabla.selection()

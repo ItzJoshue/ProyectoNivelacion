@@ -3,42 +3,71 @@ from tkinter import messagebox, ttk
 
 from servicios.gestor_academico import GestorAcademico
 from servicios.matricula_servicio import MatriculaServicio
+from Vistas.ui.components import (
+    Card,
+    SPACE_MD,
+    button_row,
+    create_treeview,
+    form_field,
+    insertar_filas,
+    page_header,
+)
 
 
 class MatriculaFrame(ttk.Frame):
     def __init__(self, parent: tk.Widget, gestor: GestorAcademico, matricula: MatriculaServicio) -> None:
-        super().__init__(parent, padding=10)
+        super().__init__(parent, style="Content.TFrame")
         self.gestor = gestor
         self.matricula = matricula
         self.var_est = tk.StringVar()
         self.var_cur = tk.StringVar()
         self.var_aula = tk.StringVar()
 
-        ttk.Label(self, text="Gestión de Matrículas", font=("Segoe UI", 14, "bold")).pack(anchor=tk.W, pady=(0, 10))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
 
-        form = ttk.LabelFrame(self, text="Nueva matrícula", padding=10)
-        form.pack(fill=tk.X, pady=(0, 10))
+        page_header(self, "Gestión de Matrículas", "Asigne estudiantes a cursos y aulas").grid(
+            row=0, column=0, sticky="ew"
+        )
 
-        ttk.Label(form, text="Estudiante").grid(row=0, column=0, sticky=tk.W, pady=4)
-        self.combo_est = ttk.Combobox(form, textvariable=self.var_est, width=55, state="readonly")
-        self.combo_est.grid(row=0, column=1, padx=8, pady=4)
+        form_card = Card(self, title="Nueva matrícula")
+        form_card.grid(row=1, column=0, sticky="ew", pady=(0, SPACE_MD))
+        form_card.body.columnconfigure(0, weight=1)
 
-        ttk.Label(form, text="Curso").grid(row=1, column=0, sticky=tk.W, pady=4)
-        self.combo_cur = ttk.Combobox(form, textvariable=self.var_cur, width=55, state="readonly")
-        self.combo_cur.grid(row=1, column=1, padx=8, pady=4)
+        est_container, self.combo_est = form_field(
+            form_card.body, "Estudiante", self.var_est, combobox=True, readonly=True, width=52
+        )
+        est_container.grid(row=0, column=0, sticky="ew")
 
-        ttk.Label(form, text="Aula").grid(row=2, column=0, sticky=tk.W, pady=4)
-        self.combo_aula = ttk.Combobox(form, textvariable=self.var_aula, width=55, state="readonly")
-        self.combo_aula.grid(row=2, column=1, padx=8, pady=4)
+        cur_container, self.combo_cur = form_field(
+            form_card.body, "Curso", self.var_cur, combobox=True, readonly=True, width=52
+        )
+        cur_container.grid(row=1, column=0, sticky="ew")
 
-        ttk.Button(form, text="Recargar", command=self.cargar_listas).grid(row=3, column=0, pady=8)
-        ttk.Button(form, text="Matricular", command=self._matricular).grid(row=3, column=1, sticky=tk.E, pady=8)
+        aula_container, self.combo_aula = form_field(
+            form_card.body, "Aula", self.var_aula, combobox=True, readonly=True, width=52
+        )
+        aula_container.grid(row=2, column=0, sticky="ew")
 
-        self.tabla = ttk.Treeview(self, columns=("id", "estudiante", "curso", "aula"), show="headings", height=12)
-        for c in ("id", "estudiante", "curso", "aula"):
-            self.tabla.heading(c, text=c.upper())
-            self.tabla.column(c, width=180)
-        self.tabla.pack(fill=tk.BOTH, expand=True)
+        acciones = ttk.Frame(form_card.body, style="Card.TFrame")
+        acciones.grid(row=3, column=0, sticky="w", pady=(4, 0))
+        button_row(
+            acciones,
+            [
+                ("Recargar listas", self.cargar_listas, "secondary"),
+                ("Matricular", self._matricular, "primary"),
+            ],
+        ).pack(anchor=tk.W)
+
+        tabla_card = Card(self, title="Matrículas registradas")
+        tabla_card.grid(row=2, column=0, sticky="nsew")
+        tabla_card.body.rowconfigure(0, weight=1)
+        tabla_card.body.columnconfigure(0, weight=1)
+
+        cols = ("id", "estudiante", "curso", "aula")
+        headings = {"id": "ID", "estudiante": "Estudiante", "curso": "Curso", "aula": "Aula"}
+        self.tabla, tree_wrap = create_treeview(tabla_card.body, cols, headings, height=14, col_width=180)
+        tree_wrap.grid(row=0, column=0, sticky="nsew")
         self.cargar_listas()
         self.refrescar()
 
@@ -72,5 +101,14 @@ class MatriculaFrame(ttk.Frame):
         est = {e.cedula: e.nombre_completo for e in self.gestor.listar_estudiantes()}
         cur = {c.id: c.nombre for c in self.matricula.listar_cursos()}
         aul = {a.id: a.codigo for a in self.matricula.listar_aulas()}
+        filas = []
         for m in self.matricula.listar_matriculas():
-            self.tabla.insert("", tk.END, values=(m.id, est.get(m.cedula_estudiante, m.cedula_estudiante), cur.get(m.id_curso, m.id_curso), aul.get(m.id_aula, m.id_aula)))
+            filas.append(
+                (
+                    m.id,
+                    est.get(m.cedula_estudiante, m.cedula_estudiante),
+                    cur.get(m.id_curso, m.id_curso),
+                    aul.get(m.id_aula, m.id_aula),
+                )
+            )
+        insertar_filas(self.tabla, filas)

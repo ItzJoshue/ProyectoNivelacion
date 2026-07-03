@@ -3,10 +3,28 @@ from tkinter import messagebox, ttk
 from typing import Callable
 
 from servicios.autenticacion_servicio import AutenticacionServicio
+from Vistas.ui.components import Card, SPACE_MD, button_row, form_field, page_header
 
 
 class RegistroFrame(ttk.Frame):
     """Registro de cuenta como estudiante o docente."""
+
+    _CAMPOS_COMUNES = [
+        ("Cédula", "cedula"),
+        ("Nombre", "nombre"),
+        ("Apellido", "apellido"),
+    ]
+    _CAMPOS_ESTUDIANTE = [
+        ("Carrera", "carrera"),
+        ("Email", "email"),
+    ]
+    _CAMPOS_DOCENTE = [
+        ("Departamento", "departamento"),
+    ]
+    _CAMPOS_CREDENCIALES = [
+        ("Contraseña", "contrasena"),
+        ("Confirmar contraseña", "confirmar"),
+    ]
 
     def __init__(
         self,
@@ -15,15 +33,26 @@ class RegistroFrame(ttk.Frame):
         on_registrado: Callable[[], None],
         on_volver: Callable[[], None],
     ) -> None:
-        super().__init__(parent, padding=20)
+        super().__init__(parent, style="App.TFrame")
         self.auth = auth
         self.on_registrado = on_registrado
         self.on_volver = on_volver
 
-        ttk.Label(self, text="Crear cuenta", font=("Segoe UI", 16, "bold")).pack(anchor=tk.W, pady=(0, 12))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
-        form = ttk.LabelFrame(self, text="Datos personales", padding=12)
-        form.pack(fill=tk.X, pady=(0, 10))
+        scroll_host = ttk.Frame(self, style="App.TFrame")
+        scroll_host.grid(row=0, column=0, sticky="nsew")
+        scroll_host.columnconfigure(0, weight=1)
+
+        page_header(scroll_host, "Crear cuenta", "Complete sus datos para registrarse en el sistema").pack(
+            fill=tk.X, pady=(0, SPACE_MD)
+        )
+
+        layout = ttk.Frame(scroll_host, style="App.TFrame")
+        layout.pack(fill=tk.BOTH, expand=True)
+        layout.columnconfigure(0, weight=1)
+        layout.columnconfigure(1, weight=1)
 
         self.var_rol = tk.StringVar(value="estudiante")
         self.vars = {
@@ -37,38 +66,75 @@ class RegistroFrame(ttk.Frame):
             "confirmar": tk.StringVar(),
         }
 
-        ttk.Label(form, text="Registrarme como:").grid(row=0, column=0, sticky=tk.W, pady=4)
-        rol_frame = ttk.Frame(form)
-        rol_frame.grid(row=0, column=1, sticky=tk.W, pady=4)
+        card = Card(layout, title="Datos del estudiante")
+        card.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, SPACE_MD))
+        self._card = card
+
+        rol_box = ttk.Frame(card.body, style="Card.TFrame")
+        rol_box.pack(fill=tk.X, pady=(0, SPACE_MD))
+        ttk.Label(rol_box, text="Registrarme como", style="Field.TLabel").pack(anchor=tk.W)
+        rol_btns = ttk.Frame(rol_box, style="Card.TFrame")
+        rol_btns.pack(anchor=tk.W, pady=(4, 0))
         ttk.Radiobutton(
-            rol_frame, text="Estudiante", variable=self.var_rol, value="estudiante"
-        ).pack(side=tk.LEFT, padx=(0, 12))
-        ttk.Radiobutton(rol_frame, text="Docente", variable=self.var_rol, value="docente").pack(
-            side=tk.LEFT
+            rol_btns, text="Estudiante", variable=self.var_rol, value="estudiante",
+            style="Modern.TRadiobutton", command=self._actualizar_campos_rol,
+        ).pack(side=tk.LEFT, padx=(0, 16))
+        ttk.Radiobutton(
+            rol_btns, text="Docente", variable=self.var_rol, value="docente",
+            style="Modern.TRadiobutton", command=self._actualizar_campos_rol,
+        ).pack(side=tk.LEFT)
+
+        self._form = ttk.Frame(card.body, style="Card.TFrame")
+        self._form.pack(fill=tk.X)
+        self._form.columnconfigure(0, weight=1)
+        self._form.columnconfigure(1, weight=1)
+
+        self._widgets: dict[str, tuple[ttk.Frame, ttk.Entry]] = {}
+        for etiqueta, clave in (
+            self._CAMPOS_COMUNES + self._CAMPOS_ESTUDIANTE + self._CAMPOS_DOCENTE + self._CAMPOS_CREDENCIALES
+        ):
+            show = "*" if clave in ("contrasena", "confirmar") else None
+            self._widgets[clave] = form_field(self._form, etiqueta, self.vars[clave], show=show, width=32)
+
+        acciones = ttk.Frame(layout, style="App.TFrame")
+        acciones.grid(row=1, column=0, columnspan=2, sticky="w")
+        button_row(
+            acciones,
+            [
+                ("Registrar", self._registrar, "primary"),
+                ("Volver al login", self.on_volver, "secondary"),
+            ],
+        ).pack(anchor=tk.W)
+
+        self._actualizar_campos_rol()
+
+    def _actualizar_campos_rol(self) -> None:
+        es_estudiante = self.var_rol.get() == "estudiante"
+        visibles = (
+            [c for _, c in self._CAMPOS_COMUNES]
+            + ([c for _, c in self._CAMPOS_ESTUDIANTE] if es_estudiante else [c for _, c in self._CAMPOS_DOCENTE])
+            + [c for _, c in self._CAMPOS_CREDENCIALES]
         )
 
-        campos = [
-            ("Cédula:", "cedula"),
-            ("Nombre:", "nombre"),
-            ("Apellido:", "apellido"),
-            ("Carrera (estudiante):", "carrera"),
-            ("Departamento (docente):", "departamento"),
-            ("Email:", "email"),
-            ("Contraseña:", "contrasena"),
-            ("Confirmar contraseña:", "confirmar"),
-        ]
+        if es_estudiante:
+            self.vars["departamento"].set("")
+        else:
+            self.vars["carrera"].set("")
+            self.vars["email"].set("")
 
-        for i, (etiqueta, clave) in enumerate(campos, start=1):
-            ttk.Label(form, text=etiqueta).grid(row=i, column=0, sticky=tk.W, pady=3)
-            show = "*" if "contrasena" in clave or clave == "confirmar" else None
-            ttk.Entry(form, textvariable=self.vars[clave], width=36, show=show).grid(
-                row=i, column=1, sticky=tk.W, padx=8, pady=3
-            )
+        col = 0
+        row = 0
+        for clave, (container, _) in self._widgets.items():
+            if clave in visibles:
+                container.grid(row=row, column=col, sticky="ew", padx=(0, 12) if col == 0 else (12, 0))
+                col += 1
+                if col > 1:
+                    col = 0
+                    row += 1
+            else:
+                container.grid_remove()
 
-        btns = ttk.Frame(self)
-        btns.pack(pady=12)
-        ttk.Button(btns, text="Registrar", command=self._registrar).pack(side=tk.LEFT, padx=6)
-        ttk.Button(btns, text="Volver al login", command=self.on_volver).pack(side=tk.LEFT, padx=6)
+        self._card.set_title("Datos del estudiante" if es_estudiante else "Datos del docente")
 
     def _registrar(self) -> None:
         if self.vars["contrasena"].get() != self.vars["confirmar"].get():
@@ -80,10 +146,13 @@ class RegistroFrame(ttk.Frame):
             "cedula": self.vars["cedula"].get().strip(),
             "nombre": self.vars["nombre"].get().strip(),
             "apellido": self.vars["apellido"].get().strip(),
-            "carrera": self.vars["carrera"].get().strip(),
-            "departamento": self.vars["departamento"].get().strip(),
-            "email": self.vars["email"].get().strip(),
         }
+
+        if rol == "estudiante":
+            datos["carrera"] = self.vars["carrera"].get().strip()
+            datos["email"] = self.vars["email"].get().strip()
+        else:
+            datos["departamento"] = self.vars["departamento"].get().strip()
 
         try:
             self.auth.registrar(datos, self.vars["contrasena"].get(), rol)

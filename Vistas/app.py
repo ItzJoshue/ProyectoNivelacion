@@ -7,6 +7,7 @@ from Vistas.autenticacion.login_frame import LoginFrame
 from Vistas.autenticacion.registro_frame import RegistroFrame
 from Vistas.paneles.panel_docente import PanelDocente
 from Vistas.paneles.panel_estudiante import PanelEstudiante
+from Vistas.ui.theme import aplicar_tema
 
 
 class App:
@@ -23,15 +24,17 @@ class App:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("ULEAM Management System - Nivelación")
-        self.root.geometry("1100x720")
-        self.root.minsize(900, 600)
+        self.root.geometry("1200x760")
+        self.root.minsize(960, 640)
+        aplicar_tema(self.root)
 
-        # INYECCIÓN DE DEPENDENCIAS: todos los servicios vienen del contenedor
         self.contenedor: ContenedorAplicacion = crear_contenedor()
         self.usuario_actual: Usuario | None = None
 
-        self._contenedor_vistas = ttk.Frame(root)
+        self._contenedor_vistas = ttk.Frame(root, style="App.TFrame")
         self._contenedor_vistas.pack(fill=tk.BOTH, expand=True)
+        self._contenedor_vistas.columnconfigure(0, weight=1)
+        self._contenedor_vistas.rowconfigure(0, weight=1)
 
         self._mostrar_login()
 
@@ -49,7 +52,7 @@ class App:
             on_login=self._entrar,
             on_registro=self._mostrar_registro,
         )
-        login.place(relx=0.5, rely=0.45, anchor=tk.CENTER)
+        login.grid(row=0, column=0, sticky="nsew")
 
     def _mostrar_registro(self) -> None:
         self._limpiar_vistas()
@@ -60,25 +63,26 @@ class App:
             on_registrado=self._mostrar_login,
             on_volver=self._mostrar_login,
         )
-        registro.pack(fill=tk.BOTH, expand=True, padx=40, pady=30)
+        registro.grid(row=0, column=0, sticky="nsew", padx=48, pady=32)
 
     def _entrar(self, usuario: Usuario) -> None:
         self.usuario_actual = usuario
         self._limpiar_vistas()
         self.root.title(f"ULEAM - {usuario.rol.capitalize()}")
 
-        # CONTROL DE ACCESO POR ROL (polimorfismo de vistas)
         if usuario.rol == "docente":
             PanelDocente(
                 self._contenedor_vistas,
                 self.contenedor,
                 usuario,
                 on_logout=self._mostrar_login,
-            ).pack(fill=tk.BOTH, expand=True)
+                root=self.root,
+            ).grid(row=0, column=0, sticky="nsew")
         else:
             PanelEstudiante(
                 self._contenedor_vistas,
                 self.contenedor,
                 usuario,
                 on_logout=self._mostrar_login,
-            ).pack(fill=tk.BOTH, expand=True)
+                root=self.root,
+            ).grid(row=0, column=0, sticky="nsew")

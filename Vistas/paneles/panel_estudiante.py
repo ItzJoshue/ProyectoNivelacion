@@ -6,6 +6,7 @@ from domain.entidades.usuario import Usuario
 from servicios.contenedor import ContenedorAplicacion
 from Vistas.frames.mi_perfil_frame import MiPerfilFrame
 from Vistas.frames.mis_calificaciones_frame import MisCalificacionesFrame
+from Vistas.ui.shell import DashboardShell
 
 
 class PanelEstudiante(ttk.Frame):
@@ -20,56 +21,57 @@ class PanelEstudiante(ttk.Frame):
         contenedor: ContenedorAplicacion,
         usuario: Usuario,
         on_logout: Callable[[], None],
+        root: tk.Tk | None = None,
     ) -> None:
-        super().__init__(parent)
+        super().__init__(parent, style="App.TFrame")
         self.contenedor = contenedor
         self.usuario = usuario
         self.on_logout = on_logout
 
-        header = ttk.Frame(self, padding=(12, 8))
-        header.pack(fill=tk.X)
-        ttk.Label(
-            header,
-            text=f"Panel Estudiante — {usuario.cedula}",
-            font=("Segoe UI", 14, "bold"),
-        ).pack(side=tk.LEFT)
-        ttk.Button(header, text="Cerrar sesión", command=on_logout).pack(side=tk.RIGHT)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
-        cuerpo = ttk.Frame(self)
-        cuerpo.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
-
-        menu = ttk.Frame(cuerpo, width=160)
-        menu.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10))
-        menu.pack_propagate(False)
-
-        self.contenido = ttk.Frame(cuerpo)
-        self.contenido.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-        ttk.Button(menu, text="Mi perfil", command=self._perfil, width=16).pack(pady=4, fill=tk.X)
-        ttk.Button(menu, text="Mis calificaciones", command=self._calificaciones, width=16).pack(
-            pady=4, fill=tk.X
+        self._shell = DashboardShell(
+            self,
+            titulo="ULEAM Management System",
+            usuario=usuario.cedula,
+            rol="Estudiante",
+            menu_titulo="MI CUENTA",
+            on_logout=on_logout,
+            root=root,
         )
+        self._shell.grid(row=0, column=0, sticky="nsew")
 
-        self._perfil()
+        self._opciones = [
+            ("Mi perfil", self._perfil),
+            ("Mis calificaciones", self._calificaciones),
+        ]
+        for i, (texto, cmd) in enumerate(self._opciones):
+            self._shell.sidebar.agregar_item(texto, lambda c=cmd, idx=i: self._navegar(c, idx))
+
+        self._navegar(self._perfil, 0)
+
+    def _navegar(self, comando: Callable[[], None], indice: int) -> None:
+        self._shell.sidebar.marcar(indice)
+        comando()
 
     def _limpiar(self) -> None:
-        for w in self.contenido.winfo_children():
-            w.destroy()
+        self._shell.limpiar_contenido()
 
     def _perfil(self) -> None:
         self._limpiar()
         MiPerfilFrame(
-            self.contenido,
+            self._shell.contenido,
             self.usuario.cedula,
             self.contenedor.autenticacion,
             self.contenedor.matricula,
-        ).pack(fill=tk.BOTH, expand=True)
+        ).grid(row=0, column=0, sticky="nsew")
 
     def _calificaciones(self) -> None:
         self._limpiar()
         MisCalificacionesFrame(
-            self.contenido,
+            self._shell.contenido,
             self.usuario.cedula,
             self.contenedor.autenticacion,
             self.contenedor.matricula,
-        ).pack(fill=tk.BOTH, expand=True)
+        ).grid(row=0, column=0, sticky="nsew")

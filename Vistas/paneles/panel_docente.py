@@ -10,6 +10,7 @@ from Vistas.frames.estudiantes_frame import EstudiantesFrame
 from Vistas.frames.matricula_frame import MatriculaFrame
 from Vistas.frames.materias_frame import MateriasFrame
 from Vistas.frames.reporte_frame import ReporteFrame
+from Vistas.ui.shell import DashboardShell
 
 
 class PanelDocente(ttk.Frame):
@@ -24,32 +25,28 @@ class PanelDocente(ttk.Frame):
         contenedor: ContenedorAplicacion,
         usuario: Usuario,
         on_logout: Callable[[], None],
+        root: tk.Tk | None = None,
     ) -> None:
-        super().__init__(parent)
+        super().__init__(parent, style="App.TFrame")
         self.contenedor = contenedor
         self.usuario = usuario
         self.on_logout = on_logout
 
-        header = ttk.Frame(self, padding=(12, 8))
-        header.pack(fill=tk.X)
-        ttk.Label(
-            header,
-            text=f"Panel Docente — {usuario.cedula}",
-            font=("Segoe UI", 14, "bold"),
-        ).pack(side=tk.LEFT)
-        ttk.Button(header, text="Cerrar sesión", command=on_logout).pack(side=tk.RIGHT)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
-        cuerpo = ttk.Frame(self)
-        cuerpo.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+        self._shell = DashboardShell(
+            self,
+            titulo="ULEAM Management System",
+            usuario=usuario.cedula,
+            rol="Docente",
+            menu_titulo="ADMINISTRACIÓN",
+            on_logout=on_logout,
+            root=root,
+        )
+        self._shell.grid(row=0, column=0, sticky="nsew")
 
-        menu = ttk.Frame(cuerpo, width=180)
-        menu.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10))
-        menu.pack_propagate(False)
-
-        self.contenido = ttk.Frame(cuerpo)
-        self.contenido.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-        opciones = [
+        self._opciones = [
             ("Estudiantes", self._estudiantes),
             ("Materias", self._materias),
             ("Calificaciones", self._calificaciones),
@@ -59,59 +56,62 @@ class PanelDocente(ttk.Frame):
             ("Matrículas", self._matriculas),
             ("Reportes", self._reportes),
         ]
-        for texto, cmd in opciones:
-            ttk.Button(menu, text=texto, command=cmd, width=18).pack(pady=4, fill=tk.X)
+        for i, (texto, cmd) in enumerate(self._opciones):
+            self._shell.sidebar.agregar_item(texto, lambda c=cmd, idx=i: self._navegar(c, idx))
 
-        self._estudiantes()
+        self._navegar(self._estudiantes, 0)
+
+    def _navegar(self, comando: Callable[[], None], indice: int) -> None:
+        self._shell.sidebar.marcar(indice)
+        comando()
 
     def _limpiar(self) -> None:
-        for w in self.contenido.winfo_children():
-            w.destroy()
+        self._shell.limpiar_contenido()
 
     def _estudiantes(self) -> None:
         self._limpiar()
-        EstudiantesFrame(self.contenido, self.contenedor.gestor).pack(fill=tk.BOTH, expand=True)
+        EstudiantesFrame(self._shell.contenido, self.contenedor.gestor).grid(row=0, column=0, sticky="nsew")
 
     def _materias(self) -> None:
         self._limpiar()
-        MateriasFrame(self.contenido, self.contenedor.gestor).pack(fill=tk.BOTH, expand=True)
+        MateriasFrame(self._shell.contenido, self.contenedor.gestor).grid(row=0, column=0, sticky="nsew")
 
     def _calificaciones(self) -> None:
         self._limpiar()
-        CalificacionesFrame(self.contenido, self.contenedor.gestor).pack(fill=tk.BOTH, expand=True)
+        CalificacionesFrame(self._shell.contenido, self.contenedor.gestor).grid(row=0, column=0, sticky="nsew")
 
     def _aulas(self) -> None:
         self._limpiar()
         CrudJsonFrame(
-            self.contenido, "Gestión de Aulas", "aulas", ["codigo", "capacidad"], ["id", "codigo", "capacidad"]
-        ).pack(fill=tk.BOTH, expand=True)
+            self._shell.contenido, "Gestión de Aulas", "aulas", ["codigo", "capacidad"], ["id", "codigo", "capacidad"]
+        ).grid(row=0, column=0, sticky="nsew")
 
     def _cursos(self) -> None:
         self._limpiar()
         CrudJsonFrame(
-            self.contenido,
+            self._shell.contenido,
             "Gestión de Cursos",
             "cursos",
             ["nombre", "carrera", "cupos"],
             ["id", "nombre", "carrera", "cupos"],
-        ).pack(fill=tk.BOTH, expand=True)
+        ).grid(row=0, column=0, sticky="nsew")
 
     def _postulantes(self) -> None:
         self._limpiar()
         CrudJsonFrame(
-            self.contenido,
+            self._shell.contenido,
             "Gestión de Postulantes",
             "postulantes",
             ["nombre", "cedula", "carrera", "puntaje", "correo"],
             ["id", "nombre", "cedula", "carrera", "puntaje", "correo"],
-        ).pack(fill=tk.BOTH, expand=True)
+        ).grid(row=0, column=0, sticky="nsew")
 
     def _matriculas(self) -> None:
         self._limpiar()
-        MatriculaFrame(self.contenido, self.contenedor.gestor, self.contenedor.matricula).pack(
-            fill=tk.BOTH, expand=True
+        MatriculaFrame(self._shell.contenido, self.contenedor.gestor, self.contenedor.matricula).grid(
+            row=0, column=0, sticky="nsew"
         )
 
     def _reportes(self) -> None:
         self._limpiar()
-        ReporteFrame(self.contenido, self.contenedor.matricula).pack(fill=tk.BOTH, expand=True)
+        ReporteFrame(self._shell.contenido, self.contenedor.matricula).grid(row=0, column=0, sticky="nsew")

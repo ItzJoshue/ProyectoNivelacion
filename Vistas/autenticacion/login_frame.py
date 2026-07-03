@@ -4,10 +4,13 @@ from typing import Callable
 
 from domain.entidades.usuario import Usuario
 from servicios.autenticacion_servicio import AutenticacionServicio
+from Vistas.ui.colors import Colors
+from Vistas.ui.components import Card, SPACE_LG, SPACE_MD, form_field
+from Vistas.ui.theme import FONT
 
 
 class LoginFrame(ttk.Frame):
-    """Pantalla de inicio de sesión."""
+    """Pantalla de inicio de sesión — diseño centrado con tarjeta."""
 
     def __init__(
         self,
@@ -16,32 +19,43 @@ class LoginFrame(ttk.Frame):
         on_login: Callable[[Usuario], None],
         on_registro: Callable[[], None],
     ) -> None:
-        super().__init__(parent, padding=30)
+        super().__init__(parent, style="App.TFrame")
         self.auth = auth
         self.on_login = on_login
         self.on_registro = on_registro
 
-        ttk.Label(self, text="ULEAM Management System", font=("Segoe UI", 18, "bold")).pack(pady=(0, 4))
-        ttk.Label(self, text="Inicio de sesión").pack(pady=(0, 20))
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
-        form = ttk.Frame(self)
-        form.pack()
+        centro = ttk.Frame(self, style="App.TFrame")
+        centro.grid(row=0, column=0)
+
+        # Marca institucional
+        marca = tk.Frame(centro, bg=Colors.GRAY_50)
+        marca.pack(pady=(0, SPACE_LG))
+        logo = tk.Canvas(marca, width=56, height=56, bg=Colors.GRAY_50, highlightthickness=0)
+        logo.pack()
+        logo.create_oval(4, 4, 52, 52, fill=Colors.RED, outline="")
+        logo.create_text(28, 28, text="U", fill=Colors.WHITE, font=(FONT, 20, "bold"))
+
+        ttk.Label(centro, text="ULEAM Management System", style="Title.TLabel").pack(pady=(0, 4))
+        ttk.Label(centro, text="Sistema de Nivelación Académica", style="Subtitle.TLabel").pack(pady=(0, SPACE_LG))
+
+        card = Card(centro, title="Iniciar sesión")
+        card.pack()
 
         self.var_cedula = tk.StringVar()
         self.var_contrasena = tk.StringVar()
 
-        ttk.Label(form, text="Cédula:").grid(row=0, column=0, sticky=tk.W, pady=6)
-        ttk.Entry(form, textvariable=self.var_cedula, width=32).grid(row=0, column=1, padx=8, pady=6)
+        form_field(card.body, "Cédula", self.var_cedula, width=38)[0].pack(fill=tk.X)
+        form_field(card.body, "Contraseña", self.var_contrasena, show="*", width=38)[0].pack(fill=tk.X)
 
-        ttk.Label(form, text="Contraseña:").grid(row=1, column=0, sticky=tk.W, pady=6)
-        ttk.Entry(form, textvariable=self.var_contrasena, show="*", width=32).grid(
-            row=1, column=1, padx=8, pady=6
+        btns = ttk.Frame(card.body, style="Card.TFrame")
+        btns.pack(fill=tk.X, pady=(SPACE_MD, 0))
+        ttk.Button(btns, text="Iniciar sesión", style="Primary.TButton", command=self._login).pack(
+            side=tk.LEFT, padx=(0, 8)
         )
-
-        btns = ttk.Frame(self)
-        btns.pack(pady=20)
-        ttk.Button(btns, text="Iniciar sesión", command=self._login).pack(side=tk.LEFT, padx=6)
-        ttk.Button(btns, text="Registrarse", command=self.on_registro).pack(side=tk.LEFT, padx=6)
+        ttk.Button(btns, text="Crear cuenta", style="Secondary.TButton", command=self.on_registro).pack(side=tk.LEFT)
 
     def _login(self) -> None:
         try:
