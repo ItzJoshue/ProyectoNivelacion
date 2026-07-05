@@ -122,3 +122,34 @@ class GestorAcademico:
     def obtener_resumenes_personas(self, personas: list[Persona]) -> list[str]:
         """POLIMORFISMO: cada subclase de Persona implementa obtener_resumen()."""
         return [persona.obtener_resumen() for persona in personas]
+
+    def resolver_nombre_materia(self, referencia: str) -> str:
+        ref = referencia.strip()
+        if not ref:
+            return ref
+        for materia in self._repo_materias.obtener_todas():
+            if materia.codigo == ref.upper() or materia.nombre.lower() == ref.lower():
+                return materia.nombre
+        return ref
+
+    def materias_activas_estudiante(self, estudiante: Estudiante) -> list[tuple[str, str, int | str]]:
+        catalogo = {m.codigo: m for m in self._repo_materias.obtener_todas()}
+        por_nombre = {m.nombre.lower(): m for m in catalogo.values()}
+        referencias: set[str] = set(estudiante.materias) | set(estudiante.calificaciones.keys())
+
+        activas: list[tuple[str, str, int | str]] = []
+        vistos: set[str] = set()
+        for ref in referencias:
+            ref = ref.strip()
+            if not ref:
+                continue
+            materia = catalogo.get(ref.upper()) or por_nombre.get(ref.lower())
+            if materia:
+                if materia.codigo in vistos:
+                    continue
+                vistos.add(materia.codigo)
+                activas.append((materia.codigo, materia.nombre, materia.creditos))
+            elif ref.lower() not in vistos:
+                vistos.add(ref.lower())
+                activas.append(("", ref, ""))
+        return activas

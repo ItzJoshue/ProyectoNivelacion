@@ -59,8 +59,17 @@ class CalificacionesFrame(ttk.Frame):
         resumen_card.body.rowconfigure(0, weight=1)
         resumen_card.body.columnconfigure(0, weight=1)
 
-        self.texto = styled_text(resumen_card.body, height=20, wrap=tk.WORD)
+        texto_wrap = ttk.Frame(resumen_card.body, style="Card.TFrame")
+        texto_wrap.grid(row=0, column=0, sticky="nsew")
+        texto_wrap.rowconfigure(0, weight=1)
+        texto_wrap.columnconfigure(0, weight=1)
+
+        self.texto = styled_text(texto_wrap, height=20, wrap=tk.WORD)
         self.texto.grid(row=0, column=0, sticky="nsew")
+
+        vsb = ttk.Scrollbar(texto_wrap, orient=tk.VERTICAL, command=self.texto.yview, style="Modern.Vertical.TScrollbar")
+        self.texto.configure(yscrollcommand=vsb.set)
+        vsb.grid(row=0, column=1, sticky="ns")
         self.refrescar()
 
     def refrescar(self) -> None:

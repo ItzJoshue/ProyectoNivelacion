@@ -37,7 +37,7 @@ class PanelDocente(ttk.Frame):
 
         self._shell = DashboardShell(
             self,
-            titulo="ULEAM Management System",
+            titulo="Sistema de nivelación uleam",
             usuario=usuario.cedula,
             rol="Docente",
             menu_titulo="ADMINISTRACIÓN",

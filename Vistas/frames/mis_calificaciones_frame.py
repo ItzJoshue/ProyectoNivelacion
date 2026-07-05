@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+from domain.entidades.estudiante import NOTA_MINIMA_APROBACION
 from servicios.autenticacion_servicio import AutenticacionServicio
+from servicios.gestor_academico import GestorAcademico
 from servicios.matricula_servicio import MatriculaServicio
 from Vistas.ui.components import Card, SPACE_MD, create_treeview, insertar_filas, page_header, styled_text
 
@@ -15,11 +17,13 @@ class MisCalificacionesFrame(ttk.Frame):
         cedula: str,
         auth: AutenticacionServicio,
         matricula: MatriculaServicio,
+        gestor: GestorAcademico,
     ) -> None:
         super().__init__(parent, style="Content.TFrame")
         self.cedula = cedula
         self.auth = auth
         self.matricula = matricula
+        self.gestor = gestor
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
@@ -32,9 +36,9 @@ class MisCalificacionesFrame(ttk.Frame):
 
         self.tabla, tree_wrap = create_treeview(
             tabla_card.body,
-            ("materia", "nota"),
-            {"materia": "Materia", "nota": "Nota"},
-            height=8,
+            ("materia", "nota", "estado"),
+            {"materia": "Materia", "nota": "Nota", "estado": "Estado"},
+            height=12,
             col_width=200,
         )
         tree_wrap.grid(row=0, column=0, sticky="ew")
@@ -58,10 +62,26 @@ class MisCalificacionesFrame(ttk.Frame):
         if estudiante is None:
             self.texto.insert(tk.END, "Sin datos académicos.")
         else:
-            filas = [(materia, nota) for materia, nota in estudiante.calificaciones.items()]
+            filas = []
+            for materia, nota in estudiante.calificaciones.items():
+                nombre = self.gestor.resolver_nombre_materia(materia)
+                estado = "Aprobado" if nota >= NOTA_MINIMA_APROBACION else "Reprobado"
+                filas.append((nombre, nota, estado))
             insertar_filas(self.tabla, filas)
-            self.texto.insert(tk.END, f"Promedio general: {estudiante.promedio}\n\n")
+
+            self.texto.insert(
+                tk.END,
+                f"Promedio general: {estudiante.promedio} — {estudiante.estado_academico}\n\n",
+            )
             cursos = {c.id: c.nombre for c in self.matricula.listar_cursos()}
             for m in self.matricula.matriculas_de_estudiante(self.cedula):
                 self.texto.insert(tk.END, f"Curso matriculado: {cursos.get(m.id_curso, m.id_curso)}\n")
+
+            activas = self.gestor.materias_activas_estudiante(estudiante)
+            if activas:
+                self.texto.insert(tk.END, "\nMaterias activas:\n")
+                for codigo, nombre, creditos in activas:
+                    codigo_txt = f"{codigo} — " if codigo else ""
+                    creditos_txt = f" ({creditos} créditos)" if creditos else ""
+                    self.texto.insert(tk.END, f"• {codigo_txt}{nombre}{creditos_txt}\n")
         self.texto.config(state=tk.DISABLED)

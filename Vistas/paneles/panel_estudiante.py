@@ -33,7 +33,7 @@ class PanelEstudiante(ttk.Frame):
 
         self._shell = DashboardShell(
             self,
-            titulo="ULEAM Management System",
+            titulo="Sistema de nivelación uleam",
             usuario=usuario.cedula,
             rol="Estudiante",
             menu_titulo="MI CUENTA",
@@ -65,6 +65,7 @@ class PanelEstudiante(ttk.Frame):
             self.usuario.cedula,
             self.contenedor.autenticacion,
             self.contenedor.matricula,
+            self.contenedor.gestor,
         ).grid(row=0, column=0, sticky="nsew")
 
     def _calificaciones(self) -> None:
@@ -74,4 +75,5 @@ class PanelEstudiante(ttk.Frame):
             self.usuario.cedula,
             self.contenedor.autenticacion,
             self.contenedor.matricula,
+            self.contenedor.gestor,
         ).grid(row=0, column=0, sticky="nsew")

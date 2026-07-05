@@ -26,7 +26,7 @@ class Card(tk.Frame):
         super().__init__(
             parent,
             bg=Colors.WHITE,
-            highlightbackground=Colors.GRAY_300,
+            highlightbackground=Colors.BORDER_SOFT,
             highlightthickness=1,
             **kwargs,
         )
@@ -98,16 +98,16 @@ def styled_text(parent: tk.Widget, **kwargs) -> tk.Text:
     defaults = dict(
         font=(FONT, 10),
         bg=Colors.WHITE,
-        fg=Colors.GRAY_800,
+        fg=Colors.TEXT_PRIMARY,
         relief="flat",
         highlightthickness=1,
-        highlightbackground=Colors.GRAY_300,
-        highlightcolor=Colors.GREEN,
+        highlightbackground=Colors.BORDER,
+        highlightcolor=Colors.PRIMARY,
         padx=SPACE_MD,
         pady=SPACE_MD,
-        insertbackground=Colors.GRAY_800,
-        selectbackground=Colors.RED,
-        selectforeground=Colors.WHITE,
+        insertbackground=Colors.TEXT_PRIMARY,
+        selectbackground=Colors.PRIMARY_SOFT,
+        selectforeground=Colors.TEXT_PRIMARY,
         borderwidth=0,
     )
     defaults.update(kwargs)
@@ -145,7 +145,7 @@ def create_treeview(
     vsb.grid(row=0, column=1, sticky="ns")
 
     tree.tag_configure("odd", background=Colors.WHITE)
-    tree.tag_configure("even", background=Colors.GRAY_50)
+    tree.tag_configure("even", background=Colors.BG_APP)
 
     return tree, wrapper
 
@@ -183,25 +183,24 @@ class TopBar(tk.Frame):
         on_logout: Callable[[], None],
         root: tk.Tk | None = None,
     ) -> None:
-        super().__init__(parent, bg=Colors.WHITE, height=64, highlightbackground=Colors.GRAY_300, highlightthickness=1)
+        super().__init__(parent, bg=Colors.WHITE, height=64, highlightbackground=Colors.BORDER_SOFT, highlightthickness=1)
         self.grid_propagate(False)
         self.columnconfigure(1, weight=1)
 
-        # Logo institucional
         logo = tk.Canvas(self, width=40, height=40, bg=Colors.WHITE, highlightthickness=0)
         logo.grid(row=0, column=0, padx=(SPACE_LG, SPACE_SM), pady=SPACE_MD)
-        logo.create_oval(2, 2, 38, 38, fill=Colors.RED, outline="")
+        logo.create_oval(2, 2, 38, 38, fill=Colors.PRIMARY, outline="")
         logo.create_text(20, 20, text="U", fill=Colors.WHITE, font=(FONT, 14, "bold"))
 
         info = ttk.Frame(self, style="TopBar.TFrame")
         info.grid(row=0, column=1, sticky="w", pady=SPACE_MD)
         ttk.Label(info, text=titulo, style="TopBarTitle.TLabel").pack(anchor=tk.W)
-        ttk.Label(info, text="Sistema de Nivelación Académica", style="TopBarUser.TLabel").pack(anchor=tk.W)
+        ttk.Label(info, text="Universidad Laica Eloy Alfaro de Manabí", style="TopBarUser.TLabel").pack(anchor=tk.W)
 
         derecha = ttk.Frame(self, style="TopBar.TFrame")
         derecha.grid(row=0, column=2, sticky="e", padx=SPACE_LG, pady=SPACE_MD)
 
-        user_box = tk.Frame(derecha, bg=Colors.GRAY_50, highlightbackground=Colors.GRAY_300, highlightthickness=1)
+        user_box = tk.Frame(derecha, bg=Colors.BG_APP, highlightbackground=Colors.BORDER, highlightthickness=1)
         user_box.pack(side=tk.LEFT, padx=(0, SPACE_MD))
         inner = ttk.Frame(user_box, style="Card.TFrame", padding=(SPACE_MD, SPACE_SM))
         inner.pack()
@@ -255,7 +254,7 @@ class NavItem(tk.Frame):
         self._indicador = tk.Frame(self, bg=Colors.WHITE, width=4)
         self._indicador.pack(side=tk.LEFT, fill=tk.Y)
 
-        self._cuerpo = tk.Frame(self, bg=Colors.WHITE, highlightbackground=Colors.GRAY_300, highlightthickness=0)
+        self._cuerpo = tk.Frame(self, bg=Colors.WHITE, highlightbackground=Colors.BORDER, highlightthickness=0)
         self._cuerpo.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, SPACE_SM), pady=SPACE_XS)
 
         inner = tk.Frame(self._cuerpo, bg=Colors.WHITE)
@@ -266,14 +265,14 @@ class NavItem(tk.Frame):
 
         badge = tk.Canvas(inner, width=36, height=36, bg=Colors.WHITE, highlightthickness=0)
         badge.pack(side=tk.LEFT)
-        badge.create_oval(2, 2, 34, 34, fill=Colors.GRAY_50, outline=Colors.GRAY_300)
-        badge.create_text(18, 18, text=letra, fill=Colors.GREEN, font=(FONT, 10, "bold"))
+        badge.create_oval(2, 2, 34, 34, fill=Colors.PRIMARY_LIGHT, outline=Colors.BORDER)
+        badge.create_text(18, 18, text=letra, fill=Colors.PRIMARY, font=(FONT, 10, "bold"))
 
         self._label = tk.Label(
             inner,
             text=texto,
             bg=Colors.WHITE,
-            fg=Colors.GRAY_800,
+            fg=Colors.TEXT_PRIMARY,
             font=(FONT, 10),
             anchor="w",
         )
@@ -289,8 +288,8 @@ class NavItem(tk.Frame):
 
     def _hover_enter(self, _=None) -> None:
         if not self._seleccionado:
-            self._cuerpo.configure(bg=Colors.GRAY_50, highlightthickness=1, highlightbackground=Colors.GRAY_300)
-            self._label.configure(bg=Colors.GRAY_50)
+            self._cuerpo.configure(bg=Colors.BG_APP, highlightthickness=1, highlightbackground=Colors.BORDER)
+            self._label.configure(bg=Colors.BG_APP)
 
     def _hover_leave(self, _=None) -> None:
         if not self._seleccionado:
@@ -302,15 +301,15 @@ class NavItem(tk.Frame):
 
     def seleccionar(self) -> None:
         self._seleccionado = True
-        self._indicador.configure(bg=Colors.RED)
-        self._cuerpo.configure(bg=Colors.RED_LIGHT, highlightthickness=1, highlightbackground=Colors.RED)
-        self._label.configure(bg=Colors.RED_LIGHT, fg=Colors.RED, font=(FONT, 10, "bold"))
+        self._indicador.configure(bg=Colors.PRIMARY)
+        self._cuerpo.configure(bg=Colors.PRIMARY_LIGHT, highlightthickness=1, highlightbackground=Colors.PRIMARY_SOFT)
+        self._label.configure(bg=Colors.PRIMARY_LIGHT, fg=Colors.PRIMARY, font=(FONT, 10, "bold"))
 
     def deseleccionar(self) -> None:
         self._seleccionado = False
         self._indicador.configure(bg=Colors.WHITE)
         self._restaurar_normal()
-        self._label.configure(fg=Colors.GRAY_800, font=(FONT, 10))
+        self._label.configure(fg=Colors.TEXT_PRIMARY, font=(FONT, 10))
 
 
 class Sidebar(tk.Frame):
@@ -321,7 +320,7 @@ class Sidebar(tk.Frame):
             parent,
             bg=Colors.WHITE,
             width=240,
-            highlightbackground=Colors.GRAY_300,
+            highlightbackground=Colors.BORDER,
             highlightthickness=1,
         )
         self.grid_propagate(False)
@@ -329,7 +328,7 @@ class Sidebar(tk.Frame):
 
         header = tk.Frame(self, bg=Colors.WHITE)
         header.pack(fill=tk.X, padx=SPACE_LG, pady=(SPACE_LG, SPACE_MD))
-        tk.Label(header, text=titulo, bg=Colors.WHITE, fg=Colors.GRAY_600, font=(FONT, 9, "bold")).pack(anchor=tk.W)
+        tk.Label(header, text=titulo, bg=Colors.WHITE, fg=Colors.TEXT_MUTED, font=(FONT, 9, "bold")).pack(anchor=tk.W)
 
         self._nav = tk.Frame(self, bg=Colors.WHITE)
         self._nav.pack(fill=tk.BOTH, expand=True, padx=SPACE_SM, pady=(0, SPACE_LG))

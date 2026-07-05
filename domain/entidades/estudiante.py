@@ -3,6 +3,9 @@ from functools import singledispatchmethod
 from domain.entidades.persona import Persona
 
 
+NOTA_MINIMA_APROBACION = 7.0
+
+
 class Estudiante(Persona):
     """Estudiante de nivelación con encapsulamiento de calificaciones y materias."""
 
@@ -50,13 +53,19 @@ class Estudiante(Persona):
             return 0.0
         return round(sum(self._calificaciones.values()) / len(self._calificaciones), 2)
 
+    @property
+    def estado_academico(self) -> str:
+        if not self._calificaciones:
+            return "Sin calificar"
+        return "Aprobado" if self.promedio >= NOTA_MINIMA_APROBACION else "Reprobado"
+
     def obtener_rol(self) -> str:
         return "Estudiante"
 
     def obtener_resumen(self) -> str:
         return (
             f"{self.nombre_completo} ({self._cedula}) - {self._carrera or 'Sin carrera'} "
-            f"| Promedio: {self.promedio}"
+            f"| Promedio: {self.promedio} | {self.estado_academico}"
         )
 
     def asignar_materia(self, materia: str) -> None:

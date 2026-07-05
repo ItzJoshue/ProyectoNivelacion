@@ -23,9 +23,9 @@ class App:
 
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        self.root.title("ULEAM Management System - Nivelación")
-        self.root.geometry("1200x760")
-        self.root.minsize(960, 640)
+        self.root.title("Sistema de nivelación uleam")
+        self.root.geometry("1280x820")
+        self.root.minsize(1024, 680)
         aplicar_tema(self.root)
 
         self.contenedor: ContenedorAplicacion = crear_contenedor()
@@ -45,7 +45,7 @@ class App:
     def _mostrar_login(self) -> None:
         self._limpiar_vistas()
         self.usuario_actual = None
-        self.root.title("ULEAM - Iniciar sesión")
+        self.root.title("Sistema de nivelación uleam — Iniciar sesión")
         login = LoginFrame(
             self._contenedor_vistas,
             self.contenedor.autenticacion,
@@ -56,7 +56,7 @@ class App:
 
     def _mostrar_registro(self) -> None:
         self._limpiar_vistas()
-        self.root.title("ULEAM - Registro")
+        self.root.title("Sistema de nivelación uleam — Registro")
         registro = RegistroFrame(
             self._contenedor_vistas,
             self.contenedor.autenticacion,
@@ -68,7 +68,7 @@ class App:
     def _entrar(self, usuario: Usuario) -> None:
         self.usuario_actual = usuario
         self._limpiar_vistas()
-        self.root.title(f"ULEAM - {usuario.rol.capitalize()}")
+        self.root.title(f"Sistema de nivelación uleam — {usuario.rol.capitalize()}")
 
         if usuario.rol == "docente":
             PanelDocente(
