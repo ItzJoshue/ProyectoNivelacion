@@ -18,7 +18,7 @@ class DashboardShell(ttk.Frame):
     - Fila 1, Col 1: Área principal (scrollable)
     """
 
-    SIDEBAR_WIDTH = 240
+    SIDEBAR_WIDTH = 260
 
     def __init__(
         self,

@@ -10,6 +10,9 @@ from Vistas.ui.colors import Colors
 FONT = "Segoe UI"
 FONT_FALLBACK = "Arial"
 
+TITULO_APP = "Sistema de Nivelación ULEAM"
+SUBTITULO_INSTITUCION = "Universidad Laica Eloy Alfaro de Manabí"
+
 
 def _font(size: int, weight: str = "normal") -> tuple:
     return (FONT, size, weight) if weight != "normal" else (FONT, size)
@@ -33,29 +36,29 @@ def aplicar_tema(root: tk.Misc) -> ttk.Style:
     style.configure("Content.TFrame", background=Colors.BG_APP)
 
     # ── Labels ──────────────────────────────────────────────────────────
-    style.configure("TLabel", background=Colors.BG_APP, foreground=Colors.TEXT_PRIMARY, font=_font(10))
-    style.configure("Card.TLabel", background=Colors.WHITE, foreground=Colors.TEXT_PRIMARY, font=_font(10))
-    style.configure("Sidebar.TLabel", background=Colors.WHITE, foreground=Colors.TEXT_PRIMARY, font=_font(10))
-    style.configure("TopBar.TLabel", background=Colors.WHITE, foreground=Colors.TEXT_PRIMARY, font=_font(10))
-    style.configure("Title.TLabel", font=_font(22, "bold"), foreground=Colors.TEXT_PRIMARY)
-    style.configure("Subtitle.TLabel", font=_font(13), foreground=Colors.TEXT_SECONDARY)
+    style.configure("TLabel", background=Colors.BG_APP, foreground=Colors.TEXT_PRIMARY, font=_font(11))
+    style.configure("Card.TLabel", background=Colors.WHITE, foreground=Colors.TEXT_PRIMARY, font=_font(11))
+    style.configure("Sidebar.TLabel", background=Colors.WHITE, foreground=Colors.TEXT_PRIMARY, font=_font(11))
+    style.configure("TopBar.TLabel", background=Colors.WHITE, foreground=Colors.TEXT_PRIMARY, font=_font(11))
+    style.configure("Title.TLabel", font=_font(24, "bold"), foreground=Colors.TEXT_PRIMARY)
+    style.configure("Subtitle.TLabel", font=_font(12), foreground=Colors.TEXT_SECONDARY)
     style.configure(
         "PageTitle.TLabel",
-        font=_font(18, "bold"),
+        font=_font(20, "bold"),
         foreground=Colors.TEXT_PRIMARY,
         background=Colors.BG_APP,
     )
     style.configure(
         "CardTitle.TLabel",
-        font=_font(14, "bold"),
+        font=_font(13, "bold"),
         foreground=Colors.TEXT_PRIMARY,
         background=Colors.WHITE,
     )
-    style.configure("Field.TLabel", font=_font(9), foreground=Colors.TEXT_SECONDARY, background=Colors.WHITE)
-    style.configure("Muted.TLabel", font=_font(9), foreground=Colors.TEXT_MUTED, background=Colors.BG_APP)
+    style.configure("Field.TLabel", font=_font(10), foreground=Colors.TEXT_SECONDARY, background=Colors.WHITE)
+    style.configure("Muted.TLabel", font=_font(11), foreground=Colors.TEXT_MUTED, background=Colors.BG_APP)
     style.configure(
         "TopBarTitle.TLabel",
-        font=_font(13, "bold"),
+        font=_font(14, "bold"),
         foreground=Colors.TEXT_PRIMARY,
         background=Colors.WHITE,
     )
@@ -67,7 +70,7 @@ def aplicar_tema(root: tk.Misc) -> ttk.Style:
     )
 
     # ── Botones ─────────────────────────────────────────────────────────
-    _btn_base = dict(focuscolor=Colors.WHITE, borderwidth=0, padding=(20, 10), font=_font(10))
+    _btn_base = dict(focuscolor=Colors.WHITE, borderwidth=0, padding=(22, 11), font=_font(11))
 
     style.configure(
         "Primary.TButton",
@@ -87,8 +90,8 @@ def aplicar_tema(root: tk.Misc) -> ttk.Style:
         foreground=Colors.TEXT_PRIMARY,
         borderwidth=1,
         relief="solid",
-        padding=(18, 9),
-        font=_font(10),
+        padding=(20, 10),
+        font=_font(11),
     )
     style.map(
         "Secondary.TButton",
@@ -145,8 +148,8 @@ def aplicar_tema(root: tk.Misc) -> ttk.Style:
         bordercolor=Colors.BORDER,
         lightcolor=Colors.BORDER,
         darkcolor=Colors.BORDER,
-        padding=(10, 8),
-        font=_font(10),
+        padding=(10, 9),
+        font=_font(11),
     )
     style.map(
         "Modern.TEntry",
@@ -160,8 +163,8 @@ def aplicar_tema(root: tk.Misc) -> ttk.Style:
         foreground=Colors.TEXT_PRIMARY,
         bordercolor=Colors.BORDER,
         arrowcolor=Colors.TEXT_SECONDARY,
-        padding=(8, 8),
-        font=_font(10),
+        padding=(10, 9),
+        font=_font(11),
     )
     style.map(
         "Modern.TCombobox",
@@ -176,8 +179,8 @@ def aplicar_tema(root: tk.Misc) -> ttk.Style:
         foreground=Colors.TEXT_PRIMARY,
         fieldbackground=Colors.WHITE,
         borderwidth=0,
-        rowheight=38,
-        font=_font(10),
+        rowheight=40,
+        font=_font(11),
     )
     style.configure(
         "Modern.Treeview.Heading",
@@ -185,8 +188,8 @@ def aplicar_tema(root: tk.Misc) -> ttk.Style:
         foreground=Colors.WHITE,
         borderwidth=0,
         relief="flat",
-        padding=(12, 10),
-        font=_font(10, "bold"),
+        padding=(14, 11),
+        font=_font(11, "bold"),
     )
     style.map(
         "Modern.Treeview",
