@@ -23,15 +23,20 @@ class AutenticacionServicio:
         fabrica_estudiante: EstudianteFactory | None = None,
         fabrica_docente: DocenteFactory | None = None,
     ) -> None:
-        # INYECCIÓN DE DEPENDENCIAS: repositorios y fábricas recibidos por constructor
         self._repo_usuario = repo_usuario
         self._repo_estudiante = repo_estudiante
         self._repo_docente = repo_docente
-        # FACTORY METHOD: fábricas concretas seleccionadas según el rol
+
         self._fabrica_estudiante = fabrica_estudiante or PersonaFactoryCreator.obtener_fabrica(
             "estudiante"
         )
         self._fabrica_docente = fabrica_docente or PersonaFactoryCreator.obtener_fabrica("docente")
+
+        # Registro dinámico (SOLID: OCP) para mapear el comportamiento por rol sin alterar el exterior
+        self._mapeo_roles = {
+            "estudiante": {"fabrica": self._fabrica_estudiante, "repo": self._repo_estudiante},
+            "docente": {"fabrica": self._fabrica_docente, "repo": self._repo_docente},
+        }
 
     def registrar(self, datos: dict, contrasena: str, rol: str) -> Usuario:
         cedula = str(datos.get("cedula", "")).strip()
@@ -42,18 +47,18 @@ class AutenticacionServicio:
         if self._repo_usuario.buscar_por_cedula(cedula):
             raise ValueError(f"Ya existe una cuenta con cédula {cedula}.")
 
-        rol = rol.lower()
-        # POLIMORFISMO + FACTORY METHOD: la fábrica crea el tipo correcto de Persona
-        if rol == "estudiante":
-            persona = self._fabrica_estudiante.crear(datos)
-            self._repo_estudiante.guardar(persona)
-        elif rol == "docente":
-            persona = self._fabrica_docente.crear(datos)
-            self._repo_docente.guardar(persona)
-        else:
+        rol_limpio = rol.lower().strip()
+        
+        # POLIMORFISMO + FACTORY METHOD (Estrategia OCP): Se procesa el rol de forma dinámica
+        componentes = self._mapeo_roles.get(rol_limpio)
+        if not componentes:
             raise ValueError("Rol inválido. Use 'estudiante' o 'docente'.")
 
-        usuario = Usuario(cedula, contrasena, rol)
+        # Se crea la entidad y se guarda en su repositorio correspondiente de forma genérica
+        persona = componentes["fabrica"].crear(datos)
+        componentes["repo"].guardar(persona)
+
+        usuario = Usuario(cedula, contrasena, rol_limpio)
         self._repo_usuario.guardar(usuario)
         return usuario
 
