@@ -7,6 +7,8 @@ from Vistas.ui.components import Card, SPACE_MD, button_row, page_header, styled
 
 
 class ReporteFrame(ttk.Frame):
+    """Gestiona la generación y visualización de reportes.Permite consultar información consolidada del sistema académico
+    y acceder a la ubicación de los archivos de almacenamiento."""
     def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
         self.contenedor = contenedor
@@ -35,8 +37,12 @@ class ReporteFrame(ttk.Frame):
         self.texto.grid(row=0, column=0, sticky="nsew")
 
     def _generar(self) -> None:
+        """Genera un reporte consolidado del sistema.Solicita la información al módulo de matrículas y presenta
+        el resultado dentro del área de vista previa."""
         self.texto.delete("1.0", tk.END)
         self.texto.insert(tk.END, self.contenedor.matricula.generar_reporte())
 
     def _ruta(self) -> None:
+        """Muestra la ubicación de los archivos de datos.Facilita la identificación del directorio donde se almacenan
+        los archivos JSON utilizados por la aplicación."""
         messagebox.showinfo("Datos", f"Los archivos JSON están en:\n{DATA_DIR}")
