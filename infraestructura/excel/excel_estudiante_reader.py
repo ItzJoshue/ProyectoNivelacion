@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import ttk
 from openpyxl import load_workbook
 
 from domain.entidades.estudiante import Estudiante
@@ -17,6 +19,7 @@ class ExcelImportadorEstudiantes(IImportadorEstudiantes):
         self._fabrica = fabrica or EstudianteFactory()
 
     def importar(self, ruta: str) -> list[Estudiante]:
+        """Carga y procesa un archivo Excel para transformarlo en entidades Estudiante."""
         libro = load_workbook(ruta, read_only=True, data_only=True)
         hoja = libro.active
         filas = hoja.iter_rows(values_only=True)
@@ -24,32 +27,38 @@ class ExcelImportadorEstudiantes(IImportadorEstudiantes):
         try:
             encabezados = next(filas)
         except StopIteration as exc:
+            libro.close()
             raise ValueError("El archivo Excel está vacío.") from exc
 
         indices = self._mapear_columnas(encabezados)
         estudiantes: list[Estudiante] = []
 
-        for numero_fila, fila in enumerate(filas, start=2):
-            if not fila or all(celda is None or str(celda).strip() == "" for celda in fila):
-                continue
+        try:
+            for numero_fila, fila in enumerate(filas, start=2):
+                if not fila or all(celda is None or str(celda).strip() == "" for celda in fila):
+                    continue
 
-            datos = {
-                columna: self._obtener_valor(fila, indices.get(columna))
-                for columna in COLUMNAS_ESPERADAS
-            }
+                datos = {
+                    columna: self._obtener_valor(fila, indices.get(columna))
+                    for columna in COLUMNAS_ESPERADAS
+                }
 
-            if not datos["cedula"] or not datos["nombre"] or not datos["apellido"]:
-                raise ValueError(
-                    f"Fila {numero_fila}: cédula, nombre y apellido son obligatorios."
-                )
+                if not datos["cedula"] or not datos["nombre"] or not datos["apellido"]:
+                    raise ValueError(
+                        f"Fila {numero_fila}: cédula, nombre y apellido son obligatorios."
+                    )
 
-            estudiantes.append(self._fabrica.crear(datos))
+                estudiantes.append(self._fabrica.crear(datos))
 
-        libro.close()
+        finally:
+            # Garantiza la liberación segura del recurso en disco ante cualquier error
+            libro.close()
+
         return estudiantes
 
     @staticmethod
     def _mapear_columnas(encabezados: tuple) -> dict[str, int]:
+        """Mapea los nombres de las columnas con sus índices correspondientes."""
         normalizados = {
             str(col).strip().lower(): indice
             for indice, col in enumerate(encabezados)
@@ -67,6 +76,8 @@ class ExcelImportadorEstudiantes(IImportadorEstudiantes):
 
     @staticmethod
     def _obtener_valor(fila: tuple, indice: int | None) -> str:
+        """Extrae de forma segura el valor de una celda según su índice mapeado."""
         if indice is None or indice >= len(fila) or fila[indice] is None:
             return ""
+            
         return str(fila[indice]).strip()
