@@ -47,72 +47,42 @@ class PanelDocente(ttk.Frame):
         )
         self._shell.grid(row=0, column=0, sticky="nsew")
 
-        self._opciones = [
-            ("Estudiantes", self._estudiantes),
-            ("Materias", self._materias),
-            ("Calificaciones", self._calificaciones),
-            ("Aulas", self._aulas),
-            ("Cursos", self._cursos),
-            ("Postulantes", self._postulantes),
-            ("Matrículas", self._matriculas),
-            ("Reportes", self._reportes),
-        ]
-        for i, (texto, cmd) in enumerate(self._opciones):
-            self._shell.sidebar.agregar_item(texto, lambda c=cmd, idx=i: self._navegar(c, idx))
+        # Estrategia OCP: Mapeo unificado de componentes de infraestructura visual.
+        # Esto permite registrar o quitar vistas modificando solo este diccionario.
+        self._vistas_registro = {
+            "Estudiantes": lambda: EstudiantesFrame(self._shell.contenido, self.contenedor),
+            "Materias": lambda: MateriasFrame(self._shell.contenido, self.contenedor),
+            "Calificaciones": lambda: CalificacionesFrame(self._shell.contenido, self.contenedor),
+            "Aulas": lambda: CrudJsonFrame(
+                self._shell.contenido, "Gestión de Aulas", "aulas", ["codigo", "capacidad"], ["id", "codigo", "capacidad"]
+            ),
+            "Cursos": lambda: CrudJsonFrame(
+                self._shell.contenido, "Gestión de Cursos", "cursos", ["nombre", "carrera", "cupos"], ["id", "nombre", "carrera", "cupos"]
+            ),
+            "Postulantes": lambda: CrudJsonFrame(
+                self._shell.contenido, "Gestión de Postulantes", "postulantes", ["nombre", "cedula", "carrera", "puntaje", "correo"], ["id", "nombre", "cedula", "carrera", "puntaje", "correo"]
+            ),
+            "Matrículas": lambda: MatriculaFrame(self._shell.contenido, self.contenedor),
+            "Reportes": lambda: ReporteFrame(self._shell.contenido, self.contenedor),
+        }
 
-        self._navegar(self._estudiantes, 0)
+        # Construcción dinámica de la Sidebar
+        for indice, nombre_pestana in enumerate(self._vistas_registro.keys()):
+            self._shell.sidebar.agregar_item(
+                nombre_pestana, 
+                lambda n=nombre_pestana, idx=indice: self._navegar_a(n, idx)
+            )
 
-    def _navegar(self, comando: Callable[[], None], indice: int) -> None:
+        # Carga por defecto de la primera vista del sistema
+        self._navegar_a("Estudiantes", 0)
+
+    def _navegar_a(self, nombre_vista: str, indice: int) -> None:
+        """Despachador dinámico que cumple con SRP al centralizar la navegación."""
         self._shell.sidebar.marcar(indice)
-        comando()
-
-    def _limpiar(self) -> None:
         self._shell.limpiar_contenido()
-
-    def _estudiantes(self) -> None:
-        self._limpiar()
-        EstudiantesFrame(self._shell.contenido, self.contenedor).grid(row=0, column=0, sticky="nsew")
-
-    def _materias(self) -> None:
-        self._limpiar()
-        MateriasFrame(self._shell.contenido, self.contenedor).grid(row=0, column=0, sticky="nsew")
-
-    def _calificaciones(self) -> None:
-        self._limpiar()
-        CalificacionesFrame(self._shell.contenido, self.contenedor).grid(row=0, column=0, sticky="nsew")
-
-    def _aulas(self) -> None:
-        self._limpiar()
-        CrudJsonFrame(
-            self._shell.contenido, "Gestión de Aulas", "aulas", ["codigo", "capacidad"], ["id", "codigo", "capacidad"]
-        ).grid(row=0, column=0, sticky="nsew")
-
-    def _cursos(self) -> None:
-        self._limpiar()
-        CrudJsonFrame(
-            self._shell.contenido,
-            "Gestión de Cursos",
-            "cursos",
-            ["nombre", "carrera", "cupos"],
-            ["id", "nombre", "carrera", "cupos"],
-        ).grid(row=0, column=0, sticky="nsew")
-
-    def _postulantes(self) -> None:
-        self._limpiar()
-        CrudJsonFrame(
-            self._shell.contenido,
-            "Gestión de Postulantes",
-            "postulantes",
-            ["nombre", "cedula", "carrera", "puntaje", "correo"],
-            ["id", "nombre", "cedula", "carrera", "puntaje", "correo"],
-        ).grid(row=0, column=0, sticky="nsew")
-
-    def _matriculas(self) -> None:
-        self._limpiar()
-        MatriculaFrame(self._shell.contenido, self.contenedor).grid(
-            row=0, column=0, sticky="nsew"
-        )
-
-    def _reportes(self) -> None:
-        self._limpiar()
-        ReporteFrame(self._shell.contenido, self.contenedor).grid(row=0, column=0, sticky="nsew")
+        
+        # Factory implícito: invoca la función lambda correspondiente al nombre
+        constructor_vista = self._vistas_registro.get(nombre_vista)
+        if constructor_vista:
+            instancia_vista = constructor_vista()
+            instancia_vista.grid(row=0, column=0, sticky="nsew")
