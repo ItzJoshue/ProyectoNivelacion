@@ -10,6 +10,43 @@ from domain.interfaces.repositorio_materia import IRepositorioMateria
 from factories.persona_factory import EstudianteFactory, PersonaFactoryCreator
 
 
+class ProcesadorCatalogoMaterias:
+    """Clase interna de soporte (SOLID: SRP) para resolver y procesar colecciones de materias."""
+
+    @staticmethod
+    def resolver_nombre(referencia: str, materias: list[Materia]) -> str:
+        ref = referencia.strip()
+        if not ref:
+            return ref
+        for materia in materias:
+            if materia.codigo == ref.upper() or materia.nombre.lower() == ref.lower():
+                return materia.nombre
+        return ref
+
+    @staticmethod
+    def obtener_activas(estudiante: Estudiante, materias: list[Materia]) -> list[tuple[str, str, int | str]]:
+        catalogo = {m.codigo: m for m in materias}
+        por_nombre = {m.nombre.lower(): m for m in catalogo.values()}
+        referencias: set[str] = set(estudiante.materias) | set(estudiante.calificaciones.keys())
+
+        activas: list[tuple[str, str, int | str]] = []
+        vistos: set[str] = set()
+        for ref in referencias:
+            ref = ref.strip()
+            if not ref:
+                continue
+            materia = catalogo.get(ref.upper()) or por_nombre.get(ref.lower())
+            if materia:
+                if materia.codigo in vistos:
+                    continue
+                vistos.add(materia.codigo)
+                activas.append((materia.codigo, materia.nombre, materia.creditos))
+            elif ref.lower() not in vistos:
+                vistos.add(ref.lower())
+                activas.append(("", ref, ""))
+        return activas
+
+
 class GestorAcademico:
     """
     Servicio de aplicación con INYECCIÓN DE DEPENDENCIAS.
@@ -25,7 +62,6 @@ class GestorAcademico:
         exportador: IExportadorEstudiantes | None = None,
         fabrica_estudiante: EstudianteFactory | None = None,
     ) -> None:
-        # INYECCIÓN DE DEPENDENCIAS: las abstracciones se reciben por constructor
         self._repo_estudiantes = repo_estudiantes
         self._repo_materias = repo_materias
         self._repo_docentes = repo_docentes
@@ -36,7 +72,6 @@ class GestorAcademico:
         )
 
     def registrar_estudiante(self, datos: dict) -> Estudiante:
-        # FACTORY METHOD: la fábrica encapsula la creación del objeto
         estudiante = self._fabrica_estudiante.crear(datos)
         if self._repo_estudiantes.buscar_por_cedula(estudiante.cedula):
             raise ValueError(f"Ya existe un estudiante con cédula {estudiante.cedula}.")
@@ -124,32 +159,9 @@ class GestorAcademico:
         return [persona.obtener_resumen() for persona in personas]
 
     def resolver_nombre_materia(self, referencia: str) -> str:
-        ref = referencia.strip()
-        if not ref:
-            return ref
-        for materia in self._repo_materias.obtener_todas():
-            if materia.codigo == ref.upper() or materia.nombre.lower() == ref.lower():
-                return materia.nombre
-        return ref
+        # Se delega la responsabilidad algorítmica al procesador interno sin mutar firmas
+        return ProcesadorCatalogoMaterias.resolver_nombre(referencia, self._repo_materias.obtener_todas())
 
     def materias_activas_estudiante(self, estudiante: Estudiante) -> list[tuple[str, str, int | str]]:
-        catalogo = {m.codigo: m for m in self._repo_materias.obtener_todas()}
-        por_nombre = {m.nombre.lower(): m for m in catalogo.values()}
-        referencias: set[str] = set(estudiante.materias) | set(estudiante.calificaciones.keys())
-
-        activas: list[tuple[str, str, int | str]] = []
-        vistos: set[str] = set()
-        for ref in referencias:
-            ref = ref.strip()
-            if not ref:
-                continue
-            materia = catalogo.get(ref.upper()) or por_nombre.get(ref.lower())
-            if materia:
-                if materia.codigo in vistos:
-                    continue
-                vistos.add(materia.codigo)
-                activas.append((materia.codigo, materia.nombre, materia.creditos))
-            elif ref.lower() not in vistos:
-                vistos.add(ref.lower())
-                activas.append(("", ref, ""))
-        return activas
+        # Se delega la responsabilidad algorítmica al procesador interno sin mutar firmas
+        return ProcesadorCatalogoMaterias.obtener_activas(estudiante, self._repo_materias.obtener_todas())
