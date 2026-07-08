@@ -1,5 +1,8 @@
-# Diagrama UML — Patrón Facade
-ContenedorAplicacion actúa como Facade: las Vistas (Login, Registro) 
+# Diagramas UML — Patrones de Diseño
+
+## Facade
+
+`ContenedorAplicacion` actúa como Facade: las Vistas (Login, Registro) 
 solo interactúan con él, sin conocer los 3 servicios internos que coordina.
 
 ```mermaid
@@ -39,3 +42,31 @@ classDiagram
   ContenedorAplicacion --> GestorAcademico : coordina
   ContenedorAplicacion --> AutenticacionServicio : coordina
   ContenedorAplicacion --> MatriculaServicio : coordina
+```
+
+## Strategy
+
+`App._entrar()` decide qué panel mostrar según el rol del usuario. 
+`PanelDocente` y `PanelEstudiante` son estrategias intercambiables: 
+comparten el mismo propósito (mostrar la interfaz principal) pero cada 
+una implementa un comportamiento distinto según el rol.
+
+```mermaid
+classDiagram
+  class App {
+    -usuario_actual: Usuario
+    +_entrar(usuario)
+  }
+  class PanelAcceso {
+    <<interface>>
+  }
+  class PanelDocente {
+    +acceso completo
+  }
+  class PanelEstudiante {
+    +vista limitada
+  }
+  App ..> PanelAcceso : elige segun rol
+  PanelAcceso <|.. PanelDocente
+  PanelAcceso <|.. PanelEstudiante
+```
