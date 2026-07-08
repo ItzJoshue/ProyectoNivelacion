@@ -43,34 +43,34 @@ class PanelEstudiante(ttk.Frame):
         )
         self._shell.grid(row=0, column=0, sticky="nsew")
 
-        self._opciones = [
-            ("Mi perfil", self._perfil),
-            ("Mis calificaciones", self._calificaciones),
-        ]
-        for i, (texto, cmd) in enumerate(self._opciones):
-            self._shell.sidebar.agregar_item(texto, lambda c=cmd, idx=i: self._navegar(c, idx))
+        # Estrategia OCP (Unidad 3): Registro dinámico de componentes visuales de cuenta.
+        # Permite escalar o quitar opciones modificando solo este diccionario de mapeo.
+        self._vistas_registro = {
+            "Mi perfil": lambda: MiPerfilFrame(
+                self._shell.contenido, self.usuario.cedula, self.contenedor
+            ),
+            "Mis calificaciones": lambda: MisCalificacionesFrame(
+                self._shell.contenido, self.usuario.cedula, self.contenedor
+            ),
+        }
 
-        self._navegar(self._perfil, 0)
+        # Construcción dinámica 
+        for indice, nombre_pestana in enumerate(self._vistas_registro.keys()):
+            self._shell.sidebar.agregar_item(
+                nombre_pestana,
+                lambda n=nombre_pestana, idx=indice: self._navegar_a(n, idx)
+            )
 
-    def _navegar(self, comando: Callable[[], None], indice: int) -> None:
+        # Carga inicial por defecto de la pestaña de perfil
+        self._navegar_a("Mi perfil", 0)
+
+    def _navegar_a(self, nombre_vista: str, indice: int) -> None:
+        """Despachador centralizado de vistas que cumple con SRP al desacoplar el control del shell."""
         self._shell.sidebar.marcar(indice)
-        comando()
-
-    def _limpiar(self) -> None:
         self._shell.limpiar_contenido()
 
-    def _perfil(self) -> None:
-        self._limpiar()
-        MiPerfilFrame(
-            self._shell.contenido,
-            self.usuario.cedula,
-            self.contenedor,
-        ).grid(row=0, column=0, sticky="nsew")
-
-    def _calificaciones(self) -> None:
-        self._limpiar()
-        MisCalificacionesFrame(
-            self._shell.contenido,
-            self.usuario.cedula,
-            self.contenedor,
-        ).grid(row=0, column=0, sticky="nsew")
+        # Invocación segura mediante el mapeo del diccionario
+        constructor_vista = self._vistas_registro.get(nombre_vista)
+        if constructor_vista:
+            instancia_vista = constructor_vista()
+            instancia_vista.grid(row=0, column=0, sticky="nsew")
