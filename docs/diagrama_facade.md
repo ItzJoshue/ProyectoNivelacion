@@ -70,3 +70,35 @@ classDiagram
   PanelAcceso <|.. PanelDocente
   PanelAcceso <|.. PanelEstudiante
 ```
+
+## Factory Method
+
+`PersonaFactoryCreator` selecciona la fábrica adecuada según el tipo de 
+persona a crear. Cada fábrica concreta (`EstudianteFactory`, `DocenteFactory`) 
+sabe construir su propio tipo, sin que el código cliente conozca los detalles.
+
+```mermaid
+classDiagram
+  class PersonaFactoryCreator {
+    -_fabricas: dict
+    +obtener_fabrica(tipo)$
+  }
+  class PersonaFactory {
+    <<abstract>>
+    +crear(datos)*
+  }
+  class EstudianteFactory {
+    +crear(datos) Estudiante
+  }
+  class DocenteFactory {
+    +crear(datos) Docente
+  }
+  class Estudiante
+  class Docente
+
+  PersonaFactoryCreator ..> PersonaFactory : selecciona
+  PersonaFactory <|-- EstudianteFactory
+  PersonaFactory <|-- DocenteFactory
+  EstudianteFactory ..> Estudiante : crea
+  DocenteFactory ..> Docente : crea
+```
