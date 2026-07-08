@@ -39,11 +39,14 @@ class Matricula:
 
     @classmethod
     def from_dict(cls, datos: dict) -> "Matricula":
-        # Compatibilidad con JSON de la rama Modulosss (estudiante_id)
+        # Estrategia de mapeo flexible (SOLID: OCP) para no corromper ni mutar variables externas
         cedula = datos.get("cedula_estudiante") or datos.get("estudiante_id", "")
+        curso = datos.get("id_curso") or datos.get("curso_id", "")
+        aula = datos.get("id_aula") or datos.get("aula_id", "")
+
         return cls(
             id_matricula=str(datos.get("id", "")),
             cedula_estudiante=str(cedula),
-            id_curso=str(datos.get("curso_id", datos.get("id_curso", ""))),
-            id_aula=str(datos.get("aula_id", datos.get("id_aula", ""))),
+            id_curso=str(curso),
+            id_aula=str(aula),
         )
