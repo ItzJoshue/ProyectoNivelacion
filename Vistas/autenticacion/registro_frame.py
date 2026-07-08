@@ -6,6 +6,8 @@ from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.components import Card, SPACE_MD, button_row, form_field, page_header
 
 
+
+
 class RegistroFrame(ttk.Frame):
     """Registro de cuenta como estudiante o docente."""
 
@@ -66,6 +68,9 @@ class RegistroFrame(ttk.Frame):
             "confirmar": tk.StringVar(),
         }
 
+
+
+        
         card = Card(layout, title="Datos del estudiante")
         card.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, SPACE_MD))
         self._card = card
@@ -108,6 +113,9 @@ class RegistroFrame(ttk.Frame):
 
         self._actualizar_campos_rol()
 
+
+
+    
     def _actualizar_campos_rol(self) -> None:
         es_estudiante = self.var_rol.get() == "estudiante"
         visibles = (
@@ -136,6 +144,9 @@ class RegistroFrame(ttk.Frame):
 
         self._card.set_title("Datos del estudiante" if es_estudiante else "Datos del docente")
 
+
+
+    
     def _registrar(self) -> None:
         if self.vars["contrasena"].get() != self.vars["confirmar"].get():
             messagebox.showwarning("Validación", "Las contraseñas no coinciden.")
@@ -149,7 +160,12 @@ class RegistroFrame(ttk.Frame):
         }
 
         if rol == "estudiante":
-            datos["carrera"] = self.vars["carrera"].get().strip()
+            carrera_limpia = self.vars["carrera"].get().strip()
+            # Validación de Control de Estado: Hace obligatorio el campo de la carrera
+            if not carrera_limpia:
+                messagebox.showwarning("Validación", "El campo 'Carrera' es obligatorio para estudiantes.")
+                return
+            datos["carrera"] = carrera_limpia
             datos["email"] = self.vars["email"].get().strip()
         else:
             datos["departamento"] = self.vars["departamento"].get().strip()
@@ -160,3 +176,4 @@ class RegistroFrame(ttk.Frame):
             self.on_registrado()
         except ValueError as error:
             messagebox.showerror("Error", str(error))
+
