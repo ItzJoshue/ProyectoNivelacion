@@ -1,9 +1,23 @@
 from functools import singledispatchmethod
-
 from domain.entidades.persona import Persona
 
-
 NOTA_MINIMA_APROBACION = 7.0
+
+
+class EvaluadorAcademico:
+    """Clase de servicio/estrategia que maneja las reglas de negocio académicas (SOLID: SRP)."""
+
+    @staticmethod
+    def calcular_promedio(calificaciones: dict[str, float]) -> float:
+        if not calificaciones:
+            return 0.0
+        return round(sum(calificaciones.values()) / len(calificaciones), 2)
+
+    @staticmethod
+    def determinar_estado(promedio: float) -> str:
+        if promedio == 0.0:
+            return "Sin calificar"
+        return "Aprobado" if promedio >= NOTA_MINIMA_APROBACION else "Reprobado"
 
 
 class Estudiante(Persona):
@@ -22,7 +36,6 @@ class Estudiante(Persona):
         carrera: str = "",
         email: str = "",
     ) -> None:
-        # CONSTRUCTOR: invoca al constructor padre y inicializa estado propio
         super().__init__(cedula, nombre, apellido)
         self._carrera = carrera
         self._email = email
@@ -55,15 +68,13 @@ class Estudiante(Persona):
 
     @property
     def promedio(self) -> float:
-        if not self._calificaciones:
-            return 0.0
-        return round(sum(self._calificaciones.values()) / len(self._calificaciones), 2)
+        # Se delega la lógica al evaluador especializado
+        return EvaluadorAcademico.calcular_promedio(self._calificaciones)
 
     @property
     def estado_academico(self) -> str:
-        if not self._calificaciones:
-            return "Sin calificar"
-        return "Aprobado" if self.promedio >= NOTA_MINIMA_APROBACION else "Reprobado"
+        # Se delega la lógica al evaluador especializado
+        return EvaluadorAcademico.determinar_estado(self.promedio)
 
     def obtener_rol(self) -> str:
         """POLIMORFISMO (ABC): implementación concreta del método abstracto."""
@@ -93,21 +104,18 @@ class Estudiante(Persona):
 
     @singledispatchmethod
     def consultar_calificacion(self, consulta) -> float | dict[str, float]:
-        """SOBRECARGA DE MÉTODOS: un mismo nombre, distinto comportamiento según el tipo del argumento."""
+        """SOBRECARGA DE MÉTODOS: un mismo nombre, distinto comportamiento según el tipo."""
         raise TypeError("Consulta no soportada. Use str o list[str].")
 
     @consultar_calificacion.register
     def _(self, materia: str) -> float:
-        """SOBRECARGA: consulta la nota de una sola materia."""
         return self._calificaciones.get(materia.strip(), 0.0)
 
     @consultar_calificacion.register
     def _(self, materias: list) -> dict[str, float]:
-        """SOBRECARGA: consulta las notas de varias materias."""
         return {m: self._calificaciones.get(m.strip(), 0.0) for m in materias}
 
     def to_dict(self) -> dict[str, str | float | list | dict]:
-        """Serialización para persistencia JSON (infraestructura)."""
         return {
             "cedula": self._cedula,
             "nombre": self._nombre,
