@@ -14,6 +14,9 @@ from Vistas.ui.components import (
 
 
 class MateriasFrame(ttk.Frame):
+    """Gestiona el registro y consulta de materias académicas.
+       Permite crear nuevas materias y visualizar la información
+       almacenada dentro del sistema de gestión académica."""
     def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
         self.contenedor = contenedor
@@ -72,12 +75,18 @@ class MateriasFrame(ttk.Frame):
         self.refrescar()
 
     def refrescar(self) -> None:
+        """Actualiza la tabla de materias registradas.
+        Recupera la información almacenada en el sistema y reconstruye
+        la vista para mostrar los datos más recientes al usuario."""
         for i in self.tabla.get_children():
             self.tabla.delete(i)
         filas = [(m.codigo, m.nombre, m.creditos) for m in self.contenedor.gestor.listar_materias()]
         insertar_filas(self.tabla, filas)
 
     def _registrar(self) -> None:
+        """Registra una nueva materia académica.La interfaz recopila los datos ingresados por el usuario y
+        delega la validación y almacenamiento al gestor académico,manteniendo separadas las responsabilidades 
+        de presentacióny lógica de negocio."""
         try:
             self.contenedor.gestor.registrar_materia(
                 self.var_codigo.get().strip(),
