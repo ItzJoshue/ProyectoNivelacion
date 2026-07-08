@@ -39,8 +39,11 @@ class Curso:
 
     @classmethod
     def from_dict(cls, datos: dict) -> "Curso":
+        # Flexibilidad OCP/SRP: mapeo seguro para no romper dependencias con la infraestructura JSON
+        id_curso = datos.get("id") or datos.get("id_curso") or datos.get("curso_id", "")
+        
         return cls(
-            id_curso=str(datos.get("id", "")),
+            id_curso=str(id_curso),
             nombre=str(datos.get("nombre", "")),
             carrera=str(datos.get("carrera", "")),
             cupos=int(datos.get("cupos", 30)),
