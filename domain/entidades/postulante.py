@@ -1,5 +1,7 @@
-class Postulante:
-    """Persona que aspira a ingresar al proceso de nivelación."""
+from domain.entidades.persona import Persona
+
+class Postulante(Persona):
+    """Persona que aspira a ingresar al proceso de nivelación ."""
 
     def __init__(
         self,
@@ -10,20 +12,11 @@ class Postulante:
         puntaje: float,
         correo: str = "",
     ) -> None:
-        self._id = id_postulante
-        self._nombre = nombre.strip()
+        # Reutilizamos el constructor de la clase abstracta Persona para id, nombre y correo (herencia)
+        super().__init__(id_persona=id_postulante, nombre=nombre, email=correo)
         self._cedula = cedula.strip()
         self._carrera = carrera.strip()
         self._puntaje = puntaje
-        self._correo = correo.strip()
-
-    @property
-    def id(self) -> str:
-        return self._id
-
-    @property
-    def nombre(self) -> str:
-        return self._nombre
 
     @property
     def cedula(self) -> str:
@@ -37,19 +30,23 @@ class Postulante:
     def puntaje(self) -> float:
         return self._puntaje
 
-    @property
-    def correo(self) -> str:
-        return self._correo
+    def obtener_rol(self) -> str:
+        """Implementación obligatoria del método abstracto de Persona (Polimorfismo)."""
+        return "POSTULANTE"
+
 
     def to_dict(self) -> dict:
-        return {
-            "id": self._id,
-            "nombre": self._nombre,
+        """Serializa los datos combinando los campos heredados y los propios."""
+        # Obtenemos el diccionario base de Persona (id, nombre, email, rol)
+        datos = super().to_dict()
+        # Agregamos los atributos específicos de Postulante
+        datos.update({
             "cedula": self._cedula,
             "carrera": self._carrera,
-            "puntaje": self._puntaje,
-            "correo": self._correo,
-        }
+            "puntaje": self._puntaje
+        })
+        return datos
+
 
     @classmethod
     def from_dict(cls, datos: dict) -> "Postulante":
@@ -58,6 +55,6 @@ class Postulante:
             nombre=str(datos.get("nombre", "")),
             cedula=str(datos.get("cedula", "")),
             carrera=str(datos.get("carrera", "")),
-            puntaje=float(datos.get("puntaje", 0)),
-            correo=str(datos.get("correo", "")),
+            puntaje=float(datos.get("puntaje", 0.0)),
+            correo=str(datos.get("email", datos.get("correo", ""))),
         )
