@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from typing import Callable
 
 from domain.entidades.usuario import Usuario
 from servicios.contenedor import ContenedorAplicacion, crear_contenedor
@@ -39,13 +40,16 @@ class App:
         self._mostrar_login()
 
     def _limpiar_vistas(self) -> None:
+        """Remueve de forma segura todos los elementos del contenedor visual."""
         for widget in self._contenedor_vistas.winfo_children():
             widget.destroy()
 
     def _mostrar_login(self) -> None:
+        """Carga el formulario de inicio de sesión."""
         self._limpiar_vistas()
         self.usuario_actual = None
         self.root.title(f"{TITULO_APP} — Iniciar sesión")
+
         login = LoginFrame(
             self._contenedor_vistas,
             self.contenedor,
@@ -55,8 +59,10 @@ class App:
         login.grid(row=0, column=0, sticky="nsew")
 
     def _mostrar_registro(self) -> None:
+        """Carga el formulario de registro de nuevos usuarios."""
         self._limpiar_vistas()
         self.root.title(f"{TITULO_APP} — Registro")
+
         registro = RegistroFrame(
             self._contenedor_vistas,
             self.contenedor,
@@ -74,19 +80,19 @@ class App:
         self._limpiar_vistas()
         self.root.title(f"{TITULO_APP} — {usuario.rol.capitalize()}")
 
-        if usuario.rol == "docente":
-            PanelDocente(
+        # Despacho dinámico (Strategy Pattern) estructurado limpiamente
+        estrategias_paneles = {
+            "docente": PanelDocente,
+            "estudiante": PanelEstudiante
+        }
+
+        constructor_panel = estrategias_paneles.get(usuario.rol.lower())
+        if constructor_panel:
+            panel = constructor_panel(
                 self._contenedor_vistas,
                 self.contenedor,
                 usuario,
                 on_logout=self._mostrar_login,
                 root=self.root,
-            ).grid(row=0, column=0, sticky="nsew")
-        else:
-            PanelEstudiante(
-                self._contenedor_vistas,
-                self.contenedor,
-                usuario,
-                on_logout=self._mostrar_login,
-                root=self.root,
-            ).grid(row=0, column=0, sticky="nsew")
+            )
+            panel.grid(row=0, column=0, sticky="nsew")
