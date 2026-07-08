@@ -6,6 +6,10 @@ from Vistas.ui.components import Card, SPACE_MD, button_row, form_field, page_he
 
 
 class CalificacionesFrame(ttk.Frame):
+     """Gestiona el registro y consulta de calificaciones académicas.
+        Permite asociar calificaciones a estudiantes y materias, así como
+        visualizar información relacionada con el rendimiento académico
+        dentro del sistema de gestión académica."""
     def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
         self.contenedor = contenedor
@@ -73,6 +77,9 @@ class CalificacionesFrame(ttk.Frame):
         self.refrescar()
 
     def refrescar(self) -> None:
+        """Actualiza el resumen de estudiantes mostrado en pantalla.
+           Obtiene la información desde el gestor académico y reconstruye
+           el contenido del área de texto para reflejar los datos actuales."""
         self.texto.config(state=tk.NORMAL)
         self.texto.delete("1.0", tk.END)
         estudiantes = self.contenedor.gestor.listar_estudiantes()
@@ -84,6 +91,10 @@ class CalificacionesFrame(ttk.Frame):
         self.texto.config(state=tk.DISABLED)
 
     def _guardar(self) -> None:
+        """Registra una nueva calificación para un estudiante.
+           La interfaz recopila los datos ingresados por el usuario y delega
+           la validación y almacenamiento al gestor académico, manteniendo
+           separadas las responsabilidades de presentación y lógica de negocio."""
         try:
             self.contenedor.gestor.registrar_calificacion(
                 self.var_cedula.get().strip(),
