@@ -5,10 +5,12 @@ class Materia:
     """
 
     def __init__(self, codigo: str, nombre: str, creditos: int = 3) -> None:
-        # CONSTRUCTOR con valor por defecto (equivalente a sobrecarga de constructores)
+        # CONSTRUCTOR con valor por defecto
         self._codigo = codigo.strip().upper()
-        self._nombre = nombre.strip()
-        self._creditos = creditos
+        
+    
+        self.nombre = nombre
+        self.creditos = creditos
 
     @property
     def codigo(self) -> str:
