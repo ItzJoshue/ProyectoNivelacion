@@ -36,10 +36,14 @@ class Docente(Persona):
         materias = ", ".join(self._materias_asignadas) or "Sin materias"
         return f"{self.nombre_completo} ({self._cedula}) - {self._departamento} | {materias}"
 
+    def _normalizar_materia(self, materia: str) -> str:
+        """MÉTODO PRIVADO (Encapsulamiento): Centraliza las reglas de formato para materias."""
+        return materia.strip().upper()
+
     def asignar_materia(self, materia: str) -> None:
-        materia = materia.strip()
-        if materia and materia not in self._materias_asignadas:
-            self._materias_asignadas.append(materia)
+        materia_limpia = self._normalizar_materia(materia)
+        if materia_limpia and materia_limpia not in self._materias_asignadas:
+            self._materias_asignadas.append(materia_limpia)
 
     def to_dict(self) -> dict[str, str | list]:
         return {
