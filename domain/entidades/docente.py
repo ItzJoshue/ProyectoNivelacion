@@ -2,7 +2,7 @@ from domain.entidades.persona import Persona
 
 
 class Docente(Persona):
-    """Docente que imparte materias de nivelación."""
+    """HERENCIA: subclase de Persona especializada en docentes de nivelación."""
 
     def __init__(
         self,
@@ -28,9 +28,11 @@ class Docente(Persona):
         return tuple(self._materias_asignadas)
 
     def obtener_rol(self) -> str:
+        """POLIMORFISMO (ABC): implementación concreta del método abstracto."""
         return "Docente"
 
     def obtener_resumen(self) -> str:
+        """POLIMORFISMO (ABC): resumen específico del docente."""
         materias = ", ".join(self._materias_asignadas) or "Sin materias"
         return f"{self.nombre_completo} ({self._cedula}) - {self._departamento} | {materias}"
 

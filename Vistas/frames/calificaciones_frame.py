@@ -1,14 +1,14 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from servicios.gestor_academico import GestorAcademico
+from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.components import Card, SPACE_MD, button_row, form_field, page_header, styled_text
 
 
 class CalificacionesFrame(ttk.Frame):
-    def __init__(self, parent: tk.Widget, gestor: GestorAcademico) -> None:
+    def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
-        self.gestor = gestor
+        self.contenedor = contenedor
         self.var_cedula = tk.StringVar()
         self.var_materia = tk.StringVar()
         self.var_nota = tk.StringVar()
@@ -66,17 +66,17 @@ class CalificacionesFrame(ttk.Frame):
     def refrescar(self) -> None:
         self.texto.config(state=tk.NORMAL)
         self.texto.delete("1.0", tk.END)
-        estudiantes = self.gestor.listar_estudiantes()
+        estudiantes = self.contenedor.gestor.listar_estudiantes()
         if not estudiantes:
             self.texto.insert(tk.END, "No hay estudiantes registrados.\n")
         else:
-            for resumen in self.gestor.obtener_resumenes_personas(estudiantes):
+            for resumen in self.contenedor.gestor.obtener_resumenes_personas(estudiantes):
                 self.texto.insert(tk.END, f"• {resumen}\n")
         self.texto.config(state=tk.DISABLED)
 
     def _guardar(self) -> None:
         try:
-            self.gestor.registrar_calificacion(
+            self.contenedor.gestor.registrar_calificacion(
                 self.var_cedula.get().strip(),
                 self.var_materia.get().strip(),
                 float(self.var_nota.get()),

@@ -30,6 +30,7 @@ class EstudianteFactory(PersonaFactory):
 
 class DocenteFactory(PersonaFactory):
     def crear(self, datos: dict) -> Docente:
+        # Factory Method concreto para Docente
         return Docente(
             cedula=str(datos.get("cedula", "")).strip(),
             nombre=str(datos.get("nombre", "")).strip(),

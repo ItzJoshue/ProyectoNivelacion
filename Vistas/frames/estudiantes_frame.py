@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from servicios.gestor_academico import GestorAcademico
+from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.components import (
     Card,
     SPACE_MD,
@@ -16,9 +16,9 @@ from Vistas.ui.components import (
 class EstudiantesFrame(ttk.Frame):
     """CRUD de estudiantes + import/export Excel (solo docente)."""
 
-    def __init__(self, parent: tk.Widget, gestor: GestorAcademico) -> None:
+    def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
-        self.gestor = gestor
+        self.contenedor = contenedor
         self.vars: dict[str, tk.StringVar] = {}
 
         self.columnconfigure(0, weight=1)
@@ -91,7 +91,7 @@ class EstudiantesFrame(ttk.Frame):
         for i in self.tabla.get_children():
             self.tabla.delete(i)
         filas = []
-        for e in self.gestor.listar_estudiantes():
+        for e in self.contenedor.gestor.listar_estudiantes():
             d = e.to_dict()
             filas.append(tuple(d[k] for k in ("cedula", "nombre", "apellido", "carrera", "email", "promedio")))
         insertar_filas(self.tabla, filas)
@@ -113,7 +113,7 @@ class EstudiantesFrame(ttk.Frame):
 
     def _registrar(self) -> None:
         try:
-            self.gestor.registrar_estudiante(self._datos())
+            self.contenedor.gestor.registrar_estudiante(self._datos())
             self.refrescar()
             self._limpiar()
             messagebox.showinfo("Éxito", "Estudiante registrado.")
@@ -122,7 +122,7 @@ class EstudiantesFrame(ttk.Frame):
 
     def _actualizar(self) -> None:
         try:
-            self.gestor.actualizar_estudiante(self._datos())
+            self.contenedor.gestor.actualizar_estudiante(self._datos())
             self.refrescar()
             messagebox.showinfo("Éxito", "Estudiante actualizado.")
         except (ValueError, KeyError) as e:
@@ -132,7 +132,7 @@ class EstudiantesFrame(ttk.Frame):
         ced = self.vars["cedula"].get().strip()
         if not ced:
             return
-        if messagebox.askyesno("Confirmar", f"¿Eliminar {ced}?") and self.gestor.eliminar_estudiante(ced):
+        if messagebox.askyesno("Confirmar", f"¿Eliminar {ced}?") and self.contenedor.gestor.eliminar_estudiante(ced):
             self.refrescar()
             self._limpiar()
 
@@ -140,7 +140,7 @@ class EstudiantesFrame(ttk.Frame):
         ruta = filedialog.askopenfilename(filetypes=[("Excel", "*.xlsx")])
         if ruta:
             try:
-                n = self.gestor.importar_estudiantes_excel(ruta)
+                n = self.contenedor.gestor.importar_estudiantes_excel(ruta)
                 self.refrescar()
                 messagebox.showinfo("Importación", f"{n} estudiante(s) importados.")
             except Exception as e:
@@ -150,7 +150,7 @@ class EstudiantesFrame(ttk.Frame):
         ruta = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel", "*.xlsx")])
         if ruta:
             try:
-                n = self.gestor.exportar_estudiantes_excel(ruta)
+                n = self.contenedor.gestor.exportar_estudiantes_excel(ruta)
                 messagebox.showinfo("Exportación", f"{n} estudiante(s) exportados.")
             except Exception as e:
                 messagebox.showerror("Error", str(e))

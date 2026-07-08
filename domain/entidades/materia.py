@@ -1,7 +1,11 @@
 class Materia:
-    """Materia de nivelación con código y créditos."""
+    """
+    CLASE independiente del dominio académico.
+    ENCAPSULAMIENTO: código, nombre y créditos protegidos con @property.
+    """
 
     def __init__(self, codigo: str, nombre: str, creditos: int = 3) -> None:
+        # CONSTRUCTOR con valor por defecto (equivalente a sobrecarga de constructores)
         self._codigo = codigo.strip().upper()
         self._nombre = nombre.strip()
         self._creditos = creditos

@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from servicios.autenticacion_servicio import AutenticacionServicio
-from servicios.matricula_servicio import MatriculaServicio
+from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.components import Card, SPACE_MD, create_treeview, insertar_filas, page_header, styled_text
 
 
@@ -13,13 +12,11 @@ class MisCalificacionesFrame(ttk.Frame):
         self,
         parent: tk.Widget,
         cedula: str,
-        auth: AutenticacionServicio,
-        matricula: MatriculaServicio,
+        contenedor: ContenedorAplicacion,
     ) -> None:
         super().__init__(parent, style="Content.TFrame")
         self.cedula = cedula
-        self.auth = auth
-        self.matricula = matricula
+        self.contenedor = contenedor
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
@@ -54,14 +51,14 @@ class MisCalificacionesFrame(ttk.Frame):
         self.texto.config(state=tk.NORMAL)
         self.texto.delete("1.0", tk.END)
 
-        estudiante = self.auth.obtener_perfil_estudiante(self.cedula)
+        estudiante = self.contenedor.obtener_perfil_estudiante(self.cedula)
         if estudiante is None:
             self.texto.insert(tk.END, "Sin datos académicos.")
         else:
             filas = [(materia, nota) for materia, nota in estudiante.calificaciones.items()]
             insertar_filas(self.tabla, filas)
             self.texto.insert(tk.END, f"Promedio general: {estudiante.promedio}\n\n")
-            cursos = {c.id: c.nombre for c in self.matricula.listar_cursos()}
-            for m in self.matricula.matriculas_de_estudiante(self.cedula):
+            cursos = {c.id: c.nombre for c in self.contenedor.matricula.listar_cursos()}
+            for m in self.contenedor.matricula.matriculas_de_estudiante(self.cedula):
                 self.texto.insert(tk.END, f"Curso matriculado: {cursos.get(m.id_curso, m.id_curso)}\n")
         self.texto.config(state=tk.DISABLED)

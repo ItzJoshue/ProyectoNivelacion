@@ -25,7 +25,7 @@ class GestorAcademico:
         exportador: IExportadorEstudiantes | None = None,
         fabrica_estudiante: EstudianteFactory | None = None,
     ) -> None:
-        # Dependencias inyectadas por constructor (no se instancian aquí)
+        # INYECCIÓN DE DEPENDENCIAS: las abstracciones se reciben por constructor
         self._repo_estudiantes = repo_estudiantes
         self._repo_materias = repo_materias
         self._repo_docentes = repo_docentes

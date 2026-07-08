@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Callable
 
-from servicios.autenticacion_servicio import AutenticacionServicio
+from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.components import Card, SPACE_MD, button_row, form_field, page_header
 
 
@@ -29,12 +29,12 @@ class RegistroFrame(ttk.Frame):
     def __init__(
         self,
         parent: tk.Widget,
-        auth: AutenticacionServicio,
+        contenedor: ContenedorAplicacion,
         on_registrado: Callable[[], None],
         on_volver: Callable[[], None],
     ) -> None:
         super().__init__(parent, style="App.TFrame")
-        self.auth = auth
+        self.contenedor = contenedor
         self.on_registrado = on_registrado
         self.on_volver = on_volver
 
@@ -155,7 +155,7 @@ class RegistroFrame(ttk.Frame):
             datos["departamento"] = self.vars["departamento"].get().strip()
 
         try:
-            self.auth.registrar(datos, self.vars["contrasena"].get(), rol)
+            self.contenedor.registrar_usuario(datos, self.vars["contrasena"].get(), rol)
             messagebox.showinfo("Éxito", f"Cuenta de {rol} creada. Ya puede iniciar sesión.")
             self.on_registrado()
         except ValueError as error:

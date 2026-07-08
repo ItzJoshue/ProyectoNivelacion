@@ -18,7 +18,7 @@ class App:
     1. Login / Registro
     2. Según rol → PanelDocente (acceso completo) o PanelEstudiante (vista limitada)
 
-    El contenedor de dependencias se crea una sola vez (Composition Root).
+    El contenedor (Facade) se crea una sola vez (Composition Root).
     """
 
     def __init__(self, root: tk.Tk) -> None:
@@ -48,7 +48,7 @@ class App:
         self.root.title("ULEAM - Iniciar sesión")
         login = LoginFrame(
             self._contenedor_vistas,
-            self.contenedor.autenticacion,
+            self.contenedor,
             on_login=self._entrar,
             on_registro=self._mostrar_registro,
         )
@@ -59,13 +59,17 @@ class App:
         self.root.title("ULEAM - Registro")
         registro = RegistroFrame(
             self._contenedor_vistas,
-            self.contenedor.autenticacion,
+            self.contenedor,
             on_registrado=self._mostrar_login,
             on_volver=self._mostrar_login,
         )
         registro.grid(row=0, column=0, sticky="nsew", padx=48, pady=32)
 
     def _entrar(self, usuario: Usuario) -> None:
+        """
+        STRATEGY (patrón de comportamiento): selecciona el panel según el rol.
+        PanelDocente y PanelEstudiante son estrategias intercambiables de interfaz.
+        """
         self.usuario_actual = usuario
         self._limpiar_vistas()
         self.root.title(f"ULEAM - {usuario.rol.capitalize()}")

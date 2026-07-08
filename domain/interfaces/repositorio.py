@@ -4,7 +4,11 @@ from domain.entidades.estudiante import Estudiante
 
 
 class IRepositorioEstudiante(ABC):
-    """Contrato para persistencia de estudiantes (Dependency Inversion)."""
+    """
+    INTERFAZ (ABC): contrato abstracto para persistencia de estudiantes.
+    POLIMORFISMO CON INTERFACES: GestorAcademico depende de esta abstracción;
+    RepositorioEstudianteJson o RepositorioEstudianteMemoria pueden sustituirse.
+    """
 
     @abstractmethod
     def guardar(self, estudiante: Estudiante) -> None:

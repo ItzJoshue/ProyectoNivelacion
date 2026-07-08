@@ -2,14 +2,14 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 from infraestructura.utilidades.almacenamiento import DATA_DIR
-from servicios.matricula_servicio import MatriculaServicio
+from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.components import Card, SPACE_MD, button_row, page_header, styled_text
 
 
 class ReporteFrame(ttk.Frame):
-    def __init__(self, parent: tk.Widget, matricula: MatriculaServicio) -> None:
+    def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
-        self.matricula = matricula
+        self.contenedor = contenedor
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
@@ -36,7 +36,7 @@ class ReporteFrame(ttk.Frame):
 
     def _generar(self) -> None:
         self.texto.delete("1.0", tk.END)
-        self.texto.insert(tk.END, self.matricula.generar_reporte())
+        self.texto.insert(tk.END, self.contenedor.matricula.generar_reporte())
 
     def _ruta(self) -> None:
         messagebox.showinfo("Datos", f"Los archivos JSON están en:\n{DATA_DIR}")

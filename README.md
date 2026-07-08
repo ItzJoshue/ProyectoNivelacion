@@ -72,7 +72,7 @@ ProyectoNivelacion/
 │   └── interfaces/
 ├── factories/                # Factory Method
 ├── infraestructura/          # Repositorios JSON, Excel, utilidades
-├── servicios/                # Lógica de negocio + inyección de dependencias
+├── servicios/                # Lógica de negocio + Facade + inyección de dependencias
 └── Vistas/
     ├── autenticacion/        # Login y registro
     ├── paneles/              # Panel docente / panel estudiante
@@ -94,7 +94,8 @@ Integra el código de la rama `Modulosss` (aulas, cursos, matrículas, postulant
 |----------|-----------|
 | Encapsulamiento + `@property` | `domain/entidades/` |
 | Herencia + polimorfismo (ABC) | `domain/entidades/persona.py` |
-| Factory Method | `factories/persona_factory.py` |
+| Factory Method (patrón creacional) | `factories/persona_factory.py` |
+| Facade (patrón estructural) | `servicios/contenedor.py` → `ContenedorAplicacion` |
 | Interfaces ABC (SOLID - I, D) | `domain/interfaces/` |
 | Inyección de dependencias | `servicios/contenedor.py`, `servicios/gestor_academico.py` |
 | Composition Root | `servicios/contenedor.py` → `crear_contenedor()` |
@@ -109,3 +110,29 @@ python Main.py
 ## Importar / exportar estudiantes (Excel)
 
 Disponible en el **Panel Docente → Estudiantes**. Columnas: `cedula`, `nombre`, `apellido`, `carrera`, `email`.
+
+---
+
+## Ejemplos de conceptos POO y patrones en el código
+
+A continuación se muestra **un ejemplo de cada concepto** solicitado, con la ruta exacta donde se aplica en el proyecto.
+
+### Fundamentos de POO
+
+| Concepto | Ejemplo en el código | Ruta |
+|----------|---------------------|------|
+| Abstracción y diagramas de modelado | Capa de dominio que modela Persona, Estudiante, Docente y Materia con relaciones documentadas | `domain/entidades/__init__.py` |
+| Clases, objetos y relaciones entre clases | Clase `Estudiante` asociada a materias y calificaciones; vinculada a `Usuario` por cédula | `domain/entidades/estudiante.py` |
+| Encapsulamiento, propiedades, constructores, métodos y sobrecarga | Atributos privados `_cedula`, `@property`, constructor con `super()` y sobrecarga con `@singledispatchmethod` en `consultar_calificacion` | `domain/entidades/estudiante.py` |
+| Definición de la herencia y aplicación | `Estudiante` y `Docente` heredan atributos y comportamiento de `Persona` | `domain/entidades/docente.py` |
+| Polimorfismo con clases abstractas | Métodos abstractos `obtener_rol()` y `obtener_resumen()` redefinidos en cada subclase | `domain/entidades/persona.py` |
+| Polimorfismo con interfaces | `RepositorioEstudianteJson` implementa el contrato `IRepositorioEstudiante` | `infraestructura/repositorios/json_estudiante_repo.py` |
+| Inyección de dependencias | `GestorAcademico` recibe repositorios e importadores por constructor, sin instanciarlos | `servicios/gestor_academico.py` |
+
+### Patrones de diseño
+
+| Tipo | Patrón | Ejemplo en el código | Ruta |
+|------|--------|---------------------|------|
+| Creacional | Factory Method | `EstudianteFactory` y `DocenteFactory` crean el tipo correcto de `Persona` | `factories/persona_factory.py` |
+| Estructural | Facade | `ContenedorAplicacion` unifica el acceso a todos los servicios de la aplicación | `servicios/contenedor.py` |
+| Comportamiento | Strategy | `App._entrar()` elige `PanelDocente` o `PanelEstudiante` según el rol del usuario | `Vistas/app.py` |

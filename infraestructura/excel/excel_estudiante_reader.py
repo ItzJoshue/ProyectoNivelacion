@@ -8,7 +8,10 @@ COLUMNAS_ESPERADAS = ("cedula", "nombre", "apellido", "carrera", "email")
 
 
 class ExcelImportadorEstudiantes(IImportadorEstudiantes):
-    """Importa estudiantes desde un archivo Excel (.xlsx)."""
+    """
+    POLIMORFISMO CON INTERFACES: implementación concreta de IImportadorEstudiantes.
+    Importa estudiantes desde un archivo Excel (.xlsx).
+    """
 
     def __init__(self, fabrica: EstudianteFactory | None = None) -> None:
         self._fabrica = fabrica or EstudianteFactory()

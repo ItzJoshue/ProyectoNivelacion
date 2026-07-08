@@ -3,7 +3,7 @@ from tkinter import messagebox, ttk
 from typing import Callable
 
 from domain.entidades.usuario import Usuario
-from servicios.autenticacion_servicio import AutenticacionServicio
+from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.colors import Colors
 from Vistas.ui.components import Card, SPACE_LG, SPACE_MD, form_field
 from Vistas.ui.theme import FONT
@@ -15,12 +15,12 @@ class LoginFrame(ttk.Frame):
     def __init__(
         self,
         parent: tk.Widget,
-        auth: AutenticacionServicio,
+        contenedor: ContenedorAplicacion,
         on_login: Callable[[Usuario], None],
         on_registro: Callable[[], None],
     ) -> None:
         super().__init__(parent, style="App.TFrame")
-        self.auth = auth
+        self.contenedor = contenedor
         self.on_login = on_login
         self.on_registro = on_registro
 
@@ -59,7 +59,7 @@ class LoginFrame(ttk.Frame):
 
     def _login(self) -> None:
         try:
-            usuario = self.auth.iniciar_sesion(
+            usuario = self.contenedor.iniciar_sesion(
                 self.var_cedula.get().strip(),
                 self.var_contrasena.get(),
             )

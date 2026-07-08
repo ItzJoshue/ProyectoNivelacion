@@ -3,13 +3,18 @@ from abc import ABC, abstractmethod
 
 class Persona(ABC):
     """
-    HERENCIA + POLIMORFISMO (clase abstracta):
-    Estudiante y Docente heredan de Persona y redefinen métodos abstractos.
-    Referencia: https://ellibrodepython.com/ (POO) | https://refactoring.guru/ (SOLID)
+    HERENCIA: clase base abstracta de la que heredan Estudiante y Docente.
+
+    POLIMORFISMO CON CLASES ABSTRACTAS: define el contrato común (obtener_rol,
+    obtener_resumen) que cada subclase implementa de forma distinta.
+
+    TEMPLATE METHOD (patrón de comportamiento): la clase base fija la estructura
+    común (cedula, nombre, apellido, nombre_completo) y delega los pasos variables
+    a las subclases mediante métodos abstractos.
     """
 
     def __init__(self, cedula: str, nombre: str, apellido: str) -> None:
-        # ENCAPSULAMIENTO: atributos privados accedidos vía @property
+        # CONSTRUCTOR + ENCAPSULAMIENTO: atributos privados accedidos vía @property
         self._cedula = cedula
         self._nombre = nombre
         self._apellido = apellido
@@ -44,11 +49,11 @@ class Persona(ABC):
 
     @abstractmethod
     def obtener_rol(self) -> str:
-        """Retorna el rol académico de la persona."""
+        """POLIMORFISMO (ABC): cada subclase retorna su rol académico."""
 
     @abstractmethod
     def obtener_resumen(self) -> str:
-        """Retorna un resumen legible de la persona."""
+        """POLIMORFISMO (ABC): cada subclase genera su propio resumen."""
 
     def __eq__(self, otro: object) -> bool:
         if not isinstance(otro, Persona):

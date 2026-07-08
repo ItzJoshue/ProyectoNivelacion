@@ -5,8 +5,8 @@ from infraestructura.utilidades.almacenamiento import guardar_json, leer_json
 
 class RepositorioEstudianteJson(IRepositorioEstudiante):
     """
-    Implementación concreta del repositorio (persistencia JSON).
-    Cumple Liskov: puede sustituir cualquier IRepositorioEstudiante.
+    POLIMORFISMO CON INTERFACES: implementación concreta del contrato IRepositorioEstudiante.
+    Persiste objetos Estudiante en archivos JSON sin que el servicio conozca el detalle.
     """
 
     ARCHIVO = "estudiantes"

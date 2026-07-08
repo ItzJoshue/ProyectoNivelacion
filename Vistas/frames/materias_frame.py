@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from servicios.gestor_academico import GestorAcademico
+from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.components import (
     Card,
     SPACE_MD,
@@ -14,9 +14,9 @@ from Vistas.ui.components import (
 
 
 class MateriasFrame(ttk.Frame):
-    def __init__(self, parent: tk.Widget, gestor: GestorAcademico) -> None:
+    def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
-        self.gestor = gestor
+        self.contenedor = contenedor
         self.var_codigo = tk.StringVar()
         self.var_nombre = tk.StringVar()
         self.var_creditos = tk.StringVar(value="3")
@@ -74,12 +74,12 @@ class MateriasFrame(ttk.Frame):
     def refrescar(self) -> None:
         for i in self.tabla.get_children():
             self.tabla.delete(i)
-        filas = [(m.codigo, m.nombre, m.creditos) for m in self.gestor.listar_materias()]
+        filas = [(m.codigo, m.nombre, m.creditos) for m in self.contenedor.gestor.listar_materias()]
         insertar_filas(self.tabla, filas)
 
     def _registrar(self) -> None:
         try:
-            self.gestor.registrar_materia(
+            self.contenedor.gestor.registrar_materia(
                 self.var_codigo.get().strip(),
                 self.var_nombre.get().strip(),
                 int(self.var_creditos.get()),

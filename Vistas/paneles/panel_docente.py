@@ -70,15 +70,15 @@ class PanelDocente(ttk.Frame):
 
     def _estudiantes(self) -> None:
         self._limpiar()
-        EstudiantesFrame(self._shell.contenido, self.contenedor.gestor).grid(row=0, column=0, sticky="nsew")
+        EstudiantesFrame(self._shell.contenido, self.contenedor).grid(row=0, column=0, sticky="nsew")
 
     def _materias(self) -> None:
         self._limpiar()
-        MateriasFrame(self._shell.contenido, self.contenedor.gestor).grid(row=0, column=0, sticky="nsew")
+        MateriasFrame(self._shell.contenido, self.contenedor).grid(row=0, column=0, sticky="nsew")
 
     def _calificaciones(self) -> None:
         self._limpiar()
-        CalificacionesFrame(self._shell.contenido, self.contenedor.gestor).grid(row=0, column=0, sticky="nsew")
+        CalificacionesFrame(self._shell.contenido, self.contenedor).grid(row=0, column=0, sticky="nsew")
 
     def _aulas(self) -> None:
         self._limpiar()
@@ -108,10 +108,10 @@ class PanelDocente(ttk.Frame):
 
     def _matriculas(self) -> None:
         self._limpiar()
-        MatriculaFrame(self._shell.contenido, self.contenedor.gestor, self.contenedor.matricula).grid(
+        MatriculaFrame(self._shell.contenido, self.contenedor).grid(
             row=0, column=0, sticky="nsew"
         )
 
     def _reportes(self) -> None:
         self._limpiar()
-        ReporteFrame(self._shell.contenido, self.contenedor.matricula).grid(row=0, column=0, sticky="nsew")
+        ReporteFrame(self._shell.contenido, self.contenedor).grid(row=0, column=0, sticky="nsew")

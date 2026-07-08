@@ -4,7 +4,12 @@ from domain.entidades.persona import Persona
 
 
 class Estudiante(Persona):
-    """Estudiante de nivelación con encapsulamiento de calificaciones y materias."""
+    """
+    HERENCIA: extiende Persona y agrega atributos propios del dominio académico.
+
+    RELACIÓN ENTRE CLASES: un Estudiante se asocia con Materia (lista _materias)
+    y mantiene calificaciones por materia (dict _calificaciones).
+    """
 
     def __init__(
         self,
@@ -14,6 +19,7 @@ class Estudiante(Persona):
         carrera: str = "",
         email: str = "",
     ) -> None:
+        # CONSTRUCTOR: invoca al constructor padre y inicializa estado propio
         super().__init__(cedula, nombre, apellido)
         self._carrera = carrera
         self._email = email
@@ -51,15 +57,18 @@ class Estudiante(Persona):
         return round(sum(self._calificaciones.values()) / len(self._calificaciones), 2)
 
     def obtener_rol(self) -> str:
+        """POLIMORFISMO (ABC): implementación concreta del método abstracto."""
         return "Estudiante"
 
     def obtener_resumen(self) -> str:
+        """POLIMORFISMO (ABC): resumen específico del estudiante."""
         return (
             f"{self.nombre_completo} ({self._cedula}) - {self._carrera or 'Sin carrera'} "
             f"| Promedio: {self.promedio}"
         )
 
     def asignar_materia(self, materia: str) -> None:
+        """MÉTODO de negocio: agrega una materia a la lista del estudiante."""
         materia = materia.strip()
         if materia and materia not in self._materias:
             self._materias.append(materia)
@@ -75,14 +84,17 @@ class Estudiante(Persona):
 
     @singledispatchmethod
     def consultar_calificacion(self, consulta) -> float | dict[str, float]:
+        """SOBRECARGA DE MÉTODOS: un mismo nombre, distinto comportamiento según el tipo del argumento."""
         raise TypeError("Consulta no soportada. Use str o list[str].")
 
     @consultar_calificacion.register
     def _(self, materia: str) -> float:
+        """SOBRECARGA: consulta la nota de una sola materia."""
         return self._calificaciones.get(materia.strip(), 0.0)
 
     @consultar_calificacion.register
     def _(self, materias: list) -> dict[str, float]:
+        """SOBRECARGA: consulta las notas de varias materias."""
         return {m: self._calificaciones.get(m.strip(), 0.0) for m in materias}
 
     def to_dict(self) -> dict[str, str | float | list | dict]:

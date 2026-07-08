@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from servicios.gestor_academico import GestorAcademico
-from servicios.matricula_servicio import MatriculaServicio
+from servicios.contenedor import ContenedorAplicacion
 from Vistas.ui.components import (
     Card,
     SPACE_MD,
@@ -15,10 +14,9 @@ from Vistas.ui.components import (
 
 
 class MatriculaFrame(ttk.Frame):
-    def __init__(self, parent: tk.Widget, gestor: GestorAcademico, matricula: MatriculaServicio) -> None:
+    def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
-        self.gestor = gestor
-        self.matricula = matricula
+        self.contenedor = contenedor
         self.var_est = tk.StringVar()
         self.var_cur = tk.StringVar()
         self.var_aula = tk.StringVar()
@@ -72,9 +70,9 @@ class MatriculaFrame(ttk.Frame):
         self.refrescar()
 
     def cargar_listas(self) -> None:
-        estudiantes = self.gestor.listar_estudiantes()
-        cursos = self.matricula.listar_cursos()
-        aulas = self.matricula.listar_aulas()
+        estudiantes = self.contenedor.gestor.listar_estudiantes()
+        cursos = self.contenedor.matricula.listar_cursos()
+        aulas = self.contenedor.matricula.listar_aulas()
         self.combo_est["values"] = [f"{e.cedula} | {e.nombre_completo}" for e in estudiantes]
         self.combo_cur["values"] = [f"{c.id} | {c.nombre} | cupos: {c.cupos}" for c in cursos]
         self.combo_aula["values"] = [f"{a.id} | {a.codigo} | cap: {a.capacidad}" for a in aulas]
@@ -85,7 +83,7 @@ class MatriculaFrame(ttk.Frame):
 
     def _matricular(self) -> None:
         try:
-            self.matricula.matricular(
+            self.contenedor.matricula.matricular(
                 self._id(self.var_est.get()),
                 self._id(self.var_cur.get()),
                 self._id(self.var_aula.get()),
@@ -98,11 +96,11 @@ class MatriculaFrame(ttk.Frame):
     def refrescar(self) -> None:
         for i in self.tabla.get_children():
             self.tabla.delete(i)
-        est = {e.cedula: e.nombre_completo for e in self.gestor.listar_estudiantes()}
-        cur = {c.id: c.nombre for c in self.matricula.listar_cursos()}
-        aul = {a.id: a.codigo for a in self.matricula.listar_aulas()}
+        est = {e.cedula: e.nombre_completo for e in self.contenedor.gestor.listar_estudiantes()}
+        cur = {c.id: c.nombre for c in self.contenedor.matricula.listar_cursos()}
+        aul = {a.id: a.codigo for a in self.contenedor.matricula.listar_aulas()}
         filas = []
-        for m in self.matricula.listar_matriculas():
+        for m in self.contenedor.matricula.listar_matriculas():
             filas.append(
                 (
                     m.id,

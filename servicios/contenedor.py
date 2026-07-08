@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-
+from domain.entidades.estudiante import Estudiante
+from domain.entidades.usuario import Usuario
 from domain.interfaces.exportador import IExportadorEstudiantes
 from domain.interfaces.importador import IImportadorEstudiantes
 from domain.interfaces.repositorio import IRepositorioEstudiante
@@ -19,19 +19,56 @@ from servicios.gestor_academico import GestorAcademico
 from servicios.matricula_servicio import MatriculaServicio
 
 
-@dataclass
 class ContenedorAplicacion:
     """
-    COMPOSITION ROOT — único lugar donde se instancian implementaciones concretas.
-    Aquí ocurre la INYECCIÓN DE DEPENDENCIAS hacia los servicios.
+    FACADE (patrón estructural — Refactoring.Guru):
+    Proporciona una interfaz unificada y simplificada al subsistema de servicios
+    (GestorAcademico, AutenticacionServicio, MatriculaServicio).
+    Oculta la complejidad de repositorios JSON, fábricas, importadores/exportadores Excel
+    y la interacción entre múltiples servicios.
+
+    También actúa como COMPOSITION ROOT: único lugar donde se instancian implementaciones
+    concretas (inyección de dependencias hacia los servicios).
     """
 
-    gestor: GestorAcademico
-    autenticacion: AutenticacionServicio
-    matricula: MatriculaServicio
+    def __init__(
+        self,
+        gestor: GestorAcademico,
+        autenticacion: AutenticacionServicio,
+        matricula: MatriculaServicio,
+    ) -> None:
+        self._gestor = gestor
+        self._autenticacion = autenticacion
+        self._matricula = matricula
+
+    @property
+    def gestor(self) -> GestorAcademico:
+        """Subsistema académico: estudiantes, materias, calificaciones y Excel."""
+        return self._gestor
+
+    @property
+    def autenticacion(self) -> AutenticacionServicio:
+        """Subsistema de registro e inicio de sesión."""
+        return self._autenticacion
+
+    @property
+    def matricula(self) -> MatriculaServicio:
+        """Subsistema de aulas, cursos, postulantes y matrículas."""
+        return self._matricula
+
+    def iniciar_sesion(self, cedula: str, contrasena: str) -> Usuario:
+        """Delegación a AutenticacionServicio — la vista no conoce el subsistema."""
+        return self._autenticacion.iniciar_sesion(cedula, contrasena)
+
+    def registrar_usuario(self, datos: dict, contrasena: str, rol: str) -> Usuario:
+        return self._autenticacion.registrar(datos, contrasena, rol)
+
+    def obtener_perfil_estudiante(self, cedula: str) -> Estudiante | None:
+        return self._autenticacion.obtener_perfil_estudiante(cedula)
 
 
 def crear_contenedor() -> ContenedorAplicacion:
+    """COMPOSITION ROOT: único lugar que instancia implementaciones concretas e inyecta dependencias."""
     iniciar_datos()
 
     # --- Implementaciones concretas (capa infraestructura) ---
@@ -68,6 +105,7 @@ def crear_contenedor() -> ContenedorAplicacion:
 
     matricula = MatriculaServicio()
 
+    # FACADE: ensambla el subsistema y expone una única interfaz a las vistas
     return ContenedorAplicacion(
         gestor=gestor,
         autenticacion=autenticacion,

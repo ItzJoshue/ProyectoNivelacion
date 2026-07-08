@@ -23,7 +23,7 @@ class AutenticacionServicio:
         fabrica_estudiante: EstudianteFactory | None = None,
         fabrica_docente: DocenteFactory | None = None,
     ) -> None:
-        # Dependencias inyectadas — el servicio no conoce JSON ni memoria
+        # INYECCIÓN DE DEPENDENCIAS: repositorios y fábricas recibidos por constructor
         self._repo_usuario = repo_usuario
         self._repo_estudiante = repo_estudiante
         self._repo_docente = repo_docente

@@ -63,8 +63,7 @@ class PanelEstudiante(ttk.Frame):
         MiPerfilFrame(
             self._shell.contenido,
             self.usuario.cedula,
-            self.contenedor.autenticacion,
-            self.contenedor.matricula,
+            self.contenedor,
         ).grid(row=0, column=0, sticky="nsew")
 
     def _calificaciones(self) -> None:
@@ -72,6 +71,5 @@ class PanelEstudiante(ttk.Frame):
         MisCalificacionesFrame(
             self._shell.contenido,
             self.usuario.cedula,
-            self.contenedor.autenticacion,
-            self.contenedor.matricula,
+            self.contenedor,
         ).grid(row=0, column=0, sticky="nsew")

@@ -3,13 +3,14 @@ import hashlib
 
 class Usuario:
     """
-    Entidad de autenticación con encapsulamiento.
-    Almacena credenciales y rol para control de acceso (estudiante | docente).
+    CLASE de autenticación. RELACIÓN: se vincula a Persona por cédula.
+    ENCAPSULAMIENTO: la contraseña se guarda hasheada y nunca se expone.
     """
 
     ROLES_VALIDOS = ("estudiante", "docente")
 
     def __init__(self, cedula: str, contrasena: str, rol: str, registrar_hash: bool = True) -> None:
+        # CONSTRUCTOR con parámetro opcional registrar_hash (sobrecarga de comportamiento)
         self._cedula = cedula.strip()
         self._rol = rol.strip().lower()
         if self._rol not in self.ROLES_VALIDOS:
