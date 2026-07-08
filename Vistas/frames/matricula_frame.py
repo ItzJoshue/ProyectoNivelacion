@@ -62,9 +62,16 @@ class MatriculaFrame(ttk.Frame):
         tabla_card.body.rowconfigure(0, weight=1)
         tabla_card.body.columnconfigure(0, weight=1)
 
-        cols = ("id", "estudiante", "curso", "aula")
-        headings = {"id": "ID", "estudiante": "Estudiante", "curso": "Curso", "aula": "Aula"}
-        self.tabla, tree_wrap = create_treeview(tabla_card.body, cols, headings, height=14, col_width=180)
+        cols = ("id", "estudiante", "curso", "aula", "promedio", "estado")
+        headings = {
+            "id": "ID",
+            "estudiante": "Estudiante",
+            "curso": "Curso",
+            "aula": "Aula",
+            "promedio": "Promedio",
+            "estado": "Estado",
+        }
+        self.tabla, tree_wrap = create_treeview(tabla_card.body, cols, headings, height=20, col_width=150)
         tree_wrap.grid(row=0, column=0, sticky="nsew")
         self.cargar_listas()
         self.refrescar()
@@ -96,17 +103,23 @@ class MatriculaFrame(ttk.Frame):
     def refrescar(self) -> None:
         for i in self.tabla.get_children():
             self.tabla.delete(i)
-        est = {e.cedula: e.nombre_completo for e in self.contenedor.gestor.listar_estudiantes()}
+        est = {e.cedula: e for e in self.contenedor.gestor.listar_estudiantes()}
         cur = {c.id: c.nombre for c in self.contenedor.matricula.listar_cursos()}
         aul = {a.id: a.codigo for a in self.contenedor.matricula.listar_aulas()}
         filas = []
         for m in self.contenedor.matricula.listar_matriculas():
+            estudiante = est.get(m.cedula_estudiante)
+            nombre = estudiante.nombre_completo if estudiante else m.cedula_estudiante
+            promedio = estudiante.promedio if estudiante else 0.0
+            estado = estudiante.estado_academico if estudiante else "Sin calificar"
             filas.append(
                 (
                     m.id,
-                    est.get(m.cedula_estudiante, m.cedula_estudiante),
+                    nombre,
                     cur.get(m.id_curso, m.id_curso),
                     aul.get(m.id_aula, m.id_aula),
+                    promedio,
+                    estado,
                 )
             )
         insertar_filas(self.tabla, filas)

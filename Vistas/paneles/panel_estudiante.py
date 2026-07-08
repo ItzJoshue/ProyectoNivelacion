@@ -7,6 +7,7 @@ from servicios.contenedor import ContenedorAplicacion
 from Vistas.frames.mi_perfil_frame import MiPerfilFrame
 from Vistas.frames.mis_calificaciones_frame import MisCalificacionesFrame
 from Vistas.ui.shell import DashboardShell
+from Vistas.ui.theme import TITULO_APP
 
 
 class PanelEstudiante(ttk.Frame):
@@ -33,7 +34,7 @@ class PanelEstudiante(ttk.Frame):
 
         self._shell = DashboardShell(
             self,
-            titulo="ULEAM Management System",
+            titulo=TITULO_APP,
             usuario=usuario.cedula,
             rol="Estudiante",
             menu_titulo="MI CUENTA",

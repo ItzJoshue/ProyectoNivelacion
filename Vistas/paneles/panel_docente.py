@@ -11,6 +11,7 @@ from Vistas.frames.matricula_frame import MatriculaFrame
 from Vistas.frames.materias_frame import MateriasFrame
 from Vistas.frames.reporte_frame import ReporteFrame
 from Vistas.ui.shell import DashboardShell
+from Vistas.ui.theme import TITULO_APP
 
 
 class PanelDocente(ttk.Frame):
@@ -37,7 +38,7 @@ class PanelDocente(ttk.Frame):
 
         self._shell = DashboardShell(
             self,
-            titulo="ULEAM Management System",
+            titulo=TITULO_APP,
             usuario=usuario.cedula,
             rol="Docente",
             menu_titulo="ADMINISTRACIÓN",

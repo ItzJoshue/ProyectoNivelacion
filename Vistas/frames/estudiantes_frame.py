@@ -73,7 +73,7 @@ class EstudiantesFrame(ttk.Frame):
         tabla_card.body.rowconfigure(0, weight=1)
         tabla_card.body.columnconfigure(0, weight=1)
 
-        cols = ("cedula", "nombre", "apellido", "carrera", "email", "promedio")
+        cols = ("cedula", "nombre", "apellido", "carrera", "email", "promedio", "estado")
         headings = {
             "cedula": "Cédula",
             "nombre": "Nombre",
@@ -81,8 +81,9 @@ class EstudiantesFrame(ttk.Frame):
             "carrera": "Carrera",
             "email": "Email",
             "promedio": "Promedio",
+            "estado": "Estado",
         }
-        self.tabla, tree_wrap = create_treeview(tabla_card.body, cols, headings, height=14, col_width=120)
+        self.tabla, tree_wrap = create_treeview(tabla_card.body, cols, headings, height=22, col_width=140)
         tree_wrap.grid(row=0, column=0, sticky="nsew")
         self.tabla.bind("<<TreeviewSelect>>", self._seleccionar)
         self.refrescar()
@@ -93,7 +94,17 @@ class EstudiantesFrame(ttk.Frame):
         filas = []
         for e in self.contenedor.gestor.listar_estudiantes():
             d = e.to_dict()
-            filas.append(tuple(d[k] for k in ("cedula", "nombre", "apellido", "carrera", "email", "promedio")))
+            filas.append(
+                (
+                    d["cedula"],
+                    d["nombre"],
+                    d["apellido"],
+                    d["carrera"],
+                    d["email"],
+                    d["promedio"],
+                    e.estado_academico,
+                )
+            )
         insertar_filas(self.tabla, filas)
 
     def _datos(self) -> dict:

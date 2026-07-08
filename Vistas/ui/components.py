@@ -8,7 +8,8 @@ from tkinter import ttk
 from typing import Callable
 
 from Vistas.ui.colors import Colors
-from Vistas.ui.theme import FONT
+from Vistas.ui.icons import _tipo_nav, dibujar_boton_ventana, dibujar_icono_nav, dibujar_logo
+from Vistas.ui.theme import FONT, SUBTITULO_INSTITUCION
 
 
 # ── Espaciado ───────────────────────────────────────────────────────────
@@ -26,7 +27,7 @@ class Card(tk.Frame):
         super().__init__(
             parent,
             bg=Colors.WHITE,
-            highlightbackground=Colors.GRAY_300,
+            highlightbackground=Colors.BORDER_SOFT,
             highlightthickness=1,
             **kwargs,
         )
@@ -51,7 +52,7 @@ def page_header(parent: tk.Widget, title: str, subtitle: str | None = None) -> t
     frame = ttk.Frame(parent, style="Content.TFrame", padding=(0, 0, 0, SPACE_LG))
     ttk.Label(frame, text=title, style="PageTitle.TLabel").pack(anchor=tk.W)
     if subtitle:
-        ttk.Label(frame, text=subtitle, style="Muted.TLabel").pack(anchor=tk.W, pady=(SPACE_XS, 0))
+        ttk.Label(frame, text=subtitle, style="Muted.TLabel").pack(anchor=tk.W, pady=(SPACE_SM, 0))
     return frame
 
 
@@ -96,18 +97,18 @@ def form_field(
 def styled_text(parent: tk.Widget, **kwargs) -> tk.Text:
     """Área de texto con apariencia moderna."""
     defaults = dict(
-        font=(FONT, 10),
+        font=(FONT, 11),
         bg=Colors.WHITE,
-        fg=Colors.GRAY_800,
+        fg=Colors.TEXT_PRIMARY,
         relief="flat",
         highlightthickness=1,
-        highlightbackground=Colors.GRAY_300,
-        highlightcolor=Colors.GREEN,
+        highlightbackground=Colors.BORDER,
+        highlightcolor=Colors.PRIMARY,
         padx=SPACE_MD,
         pady=SPACE_MD,
-        insertbackground=Colors.GRAY_800,
-        selectbackground=Colors.RED,
-        selectforeground=Colors.WHITE,
+        insertbackground=Colors.TEXT_PRIMARY,
+        selectbackground=Colors.PRIMARY_SOFT,
+        selectforeground=Colors.TEXT_PRIMARY,
         borderwidth=0,
     )
     defaults.update(kwargs)
@@ -122,8 +123,10 @@ def create_treeview(
     height: int = 12,
     col_width: int = 130,
 ) -> tuple[ttk.Treeview, ttk.Frame]:
-    """Treeview estilizado con scrollbar vertical."""
-    wrapper = ttk.Frame(parent, style="Card.TFrame")
+    """Treeview estilizado con scrollbar vertical y borde limpio."""
+    outer = tk.Frame(parent, bg=Colors.BORDER, padx=1, pady=1)
+    wrapper = ttk.Frame(outer, style="Card.TFrame")
+    wrapper.pack(fill=tk.BOTH, expand=True)
     wrapper.grid_rowconfigure(0, weight=1)
     wrapper.grid_columnconfigure(0, weight=1)
 
@@ -145,9 +148,9 @@ def create_treeview(
     vsb.grid(row=0, column=1, sticky="ns")
 
     tree.tag_configure("odd", background=Colors.WHITE)
-    tree.tag_configure("even", background=Colors.GRAY_50)
+    tree.tag_configure("even", background=Colors.BG_APP)
 
-    return tree, wrapper
+    return tree, outer
 
 
 def insertar_filas(tree: ttk.Treeview, filas: list[tuple]) -> None:
@@ -171,8 +174,29 @@ def button_row(parent: tk.Widget, botones: list[tuple[str, Callable, str]]) -> t
     return frame
 
 
+class WinControlButton(tk.Frame):
+    """Botón de control de ventana dibujado en canvas (nítido en Windows)."""
+
+    def __init__(self, parent: tk.Widget, accion: str, command: Callable[[], None]) -> None:
+        super().__init__(parent, bg=Colors.WHITE)
+        self._accion = accion
+        self._canvas = tk.Canvas(
+            self, width=40, height=30, bg=Colors.WHITE, highlightthickness=0, cursor="hand2"
+        )
+        self._canvas.pack()
+        self._redibujar(False)
+        self._canvas.bind("<Button-1>", lambda _e: command())
+        self._canvas.bind("<Enter>", lambda _e: self._redibujar(True))
+        self._canvas.bind("<Leave>", lambda _e: self._redibujar(False))
+
+    def _redibujar(self, activo: bool) -> None:
+        dibujar_boton_ventana(self._canvas, self._accion, activo=activo)
+
+
 class TopBar(tk.Frame):
     """Barra superior del dashboard — logo, título, usuario, fecha."""
+
+    _ALTURA = 72
 
     def __init__(
         self,
@@ -183,62 +207,53 @@ class TopBar(tk.Frame):
         on_logout: Callable[[], None],
         root: tk.Tk | None = None,
     ) -> None:
-        super().__init__(parent, bg=Colors.WHITE, height=64, highlightbackground=Colors.GRAY_300, highlightthickness=1)
+        super().__init__(
+            parent,
+            bg=Colors.WHITE,
+            height=self._ALTURA,
+            highlightbackground=Colors.BORDER_SOFT,
+            highlightthickness=1,
+        )
         self.grid_propagate(False)
         self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
 
-        # Logo institucional
-        logo = tk.Canvas(self, width=40, height=40, bg=Colors.WHITE, highlightthickness=0)
-        logo.grid(row=0, column=0, padx=(SPACE_LG, SPACE_SM), pady=SPACE_MD)
-        logo.create_oval(2, 2, 38, 38, fill=Colors.RED, outline="")
-        logo.create_text(20, 20, text="U", fill=Colors.WHITE, font=(FONT, 14, "bold"))
+        logo_wrap = tk.Frame(self, bg=Colors.WHITE)
+        logo_wrap.grid(row=0, column=0, padx=(SPACE_LG, SPACE_SM), pady=0, sticky="ns")
+        logo = tk.Canvas(logo_wrap, width=44, height=44, bg=Colors.WHITE, highlightthickness=0)
+        logo.pack(expand=True)
+        dibujar_logo(logo, 44, bg=Colors.WHITE)
 
         info = ttk.Frame(self, style="TopBar.TFrame")
-        info.grid(row=0, column=1, sticky="w", pady=SPACE_MD)
+        info.grid(row=0, column=1, sticky="w")
         ttk.Label(info, text=titulo, style="TopBarTitle.TLabel").pack(anchor=tk.W)
-        ttk.Label(info, text="Sistema de Nivelación Académica", style="TopBarUser.TLabel").pack(anchor=tk.W)
+        ttk.Label(info, text=SUBTITULO_INSTITUCION, style="TopBarUser.TLabel").pack(anchor=tk.W, pady=(2, 0))
 
         derecha = ttk.Frame(self, style="TopBar.TFrame")
-        derecha.grid(row=0, column=2, sticky="e", padx=SPACE_LG, pady=SPACE_MD)
+        derecha.grid(row=0, column=2, sticky="e", padx=SPACE_LG)
 
-        user_box = tk.Frame(derecha, bg=Colors.GRAY_50, highlightbackground=Colors.GRAY_300, highlightthickness=1)
+        user_box = tk.Frame(derecha, bg=Colors.BG_APP, highlightbackground=Colors.BORDER, highlightthickness=1)
         user_box.pack(side=tk.LEFT, padx=(0, SPACE_MD))
         inner = ttk.Frame(user_box, style="Card.TFrame", padding=(SPACE_MD, SPACE_SM))
         inner.pack()
-        ttk.Label(inner, text=usuario, style="Card.TLabel", font=(FONT, 10, "bold")).pack(anchor=tk.E)
+        ttk.Label(inner, text=usuario, style="Card.TLabel", font=(FONT, 11, "bold")).pack(anchor=tk.E)
         ttk.Label(inner, text=rol.capitalize(), style="Field.TLabel").pack(anchor=tk.E)
 
         fecha = datetime.now().strftime("%d/%m/%Y")
-        ttk.Label(derecha, text=fecha, style="TopBarUser.TLabel").pack(side=tk.LEFT, padx=(0, SPACE_LG))
+        ttk.Label(derecha, text=fecha, style="TopBarUser.TLabel").pack(side=tk.LEFT, padx=(0, SPACE_MD))
 
         if root is not None:
-            win_btns = ttk.Frame(derecha, style="TopBar.TFrame")
-            win_btns.pack(side=tk.LEFT)
-            for sym, cmd, tip in [("─", root.iconify, "Minimizar"), ("□", lambda: None, ""), ("✕", root.destroy, "Cerrar")]:
-                btn = ttk.Button(win_btns, text=sym, style="Ghost.TButton", width=3, command=cmd)
-                btn.pack(side=tk.LEFT, padx=1)
+            win_btns = tk.Frame(derecha, bg=Colors.WHITE)
+            win_btns.pack(side=tk.LEFT, padx=(0, SPACE_SM))
+            WinControlButton(win_btns, "minimizar", root.iconify).pack(side=tk.LEFT)
+            WinControlButton(win_btns, "maximizar", lambda: None).pack(side=tk.LEFT)
+            WinControlButton(win_btns, "cerrar", root.destroy).pack(side=tk.LEFT)
 
-        ttk.Button(derecha, text="Cerrar sesión", style="Danger.TButton", command=on_logout).pack(
-            side=tk.LEFT, padx=(SPACE_SM, 0)
-        )
+        ttk.Button(derecha, text="Cerrar sesión", style="Danger.TButton", command=on_logout).pack(side=tk.LEFT)
 
 
 class NavItem(tk.Frame):
-    """Botón de navegación lateral — tarjeta con icono, texto e indicador de selección."""
-
-    _ICONOS = {
-        "estudiantes": "E",
-        "materias": "M",
-        "calificaciones": "C",
-        "aulas": "A",
-        "cursos": "Cu",
-        "postulantes": "P",
-        "matrículas": "Ma",
-        "matriculas": "Ma",
-        "reportes": "R",
-        "mi perfil": "Pe",
-        "mis calificaciones": "No",
-    }
+    """Botón de navegación lateral — tarjeta con icono vectorial, texto e indicador."""
 
     def __init__(
         self,
@@ -251,46 +266,53 @@ class NavItem(tk.Frame):
         super().__init__(parent, bg=Colors.WHITE, cursor="hand2")
         self._command = command
         self._seleccionado = False
+        self._texto = texto
+        self._tipo = _tipo_nav(texto, icono)
 
         self._indicador = tk.Frame(self, bg=Colors.WHITE, width=4)
         self._indicador.pack(side=tk.LEFT, fill=tk.Y)
 
-        self._cuerpo = tk.Frame(self, bg=Colors.WHITE, highlightbackground=Colors.GRAY_300, highlightthickness=0)
+        self._cuerpo = tk.Frame(self, bg=Colors.WHITE, highlightbackground=Colors.BORDER, highlightthickness=0)
         self._cuerpo.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, SPACE_SM), pady=SPACE_XS)
 
         inner = tk.Frame(self._cuerpo, bg=Colors.WHITE)
-        inner.pack(fill=tk.X, padx=SPACE_MD, pady=SPACE_MD)
+        inner.pack(fill=tk.X, padx=SPACE_MD, pady=SPACE_SM)
 
-        clave = texto.lower()
-        letra = icono or self._ICONOS.get(clave, texto[:2].upper())
-
-        badge = tk.Canvas(inner, width=36, height=36, bg=Colors.WHITE, highlightthickness=0)
-        badge.pack(side=tk.LEFT)
-        badge.create_oval(2, 2, 34, 34, fill=Colors.GRAY_50, outline=Colors.GRAY_300)
-        badge.create_text(18, 18, text=letra, fill=Colors.GREEN, font=(FONT, 10, "bold"))
+        self._badge = tk.Canvas(inner, width=38, height=38, bg=Colors.WHITE, highlightthickness=0)
+        self._badge.pack(side=tk.LEFT)
+        self._redibujar_icono()
 
         self._label = tk.Label(
             inner,
             text=texto,
             bg=Colors.WHITE,
-            fg=Colors.GRAY_800,
-            font=(FONT, 10),
+            fg=Colors.TEXT_PRIMARY,
+            font=(FONT, 11),
             anchor="w",
         )
         self._label.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(SPACE_SM, 0))
 
-        for w in (self, self._cuerpo, inner, self._label, badge):
+        for w in (self, self._cuerpo, inner, self._label, self._badge):
             w.bind("<Button-1>", self._click)
             w.bind("<Enter>", self._hover_enter)
             w.bind("<Leave>", self._hover_leave)
+
+    def _redibujar_icono(self) -> None:
+        if self._seleccionado:
+            dibujar_icono_nav(
+                self._badge, self._tipo, fg=Colors.WHITE, bg=Colors.PRIMARY, borde=Colors.PRIMARY
+            )
+        else:
+            dibujar_icono_nav(self._badge, self._tipo)
 
     def _click(self, _=None) -> None:
         self._command()
 
     def _hover_enter(self, _=None) -> None:
         if not self._seleccionado:
-            self._cuerpo.configure(bg=Colors.GRAY_50, highlightthickness=1, highlightbackground=Colors.GRAY_300)
-            self._label.configure(bg=Colors.GRAY_50)
+            self._cuerpo.configure(bg=Colors.BG_APP, highlightthickness=1, highlightbackground=Colors.BORDER)
+            self._label.configure(bg=Colors.BG_APP)
+            self._badge.configure(bg=Colors.BG_APP)
 
     def _hover_leave(self, _=None) -> None:
         if not self._seleccionado:
@@ -299,18 +321,22 @@ class NavItem(tk.Frame):
     def _restaurar_normal(self) -> None:
         self._cuerpo.configure(bg=Colors.WHITE, highlightthickness=0)
         self._label.configure(bg=Colors.WHITE)
+        self._badge.configure(bg=Colors.WHITE)
+        self._redibujar_icono()
 
     def seleccionar(self) -> None:
         self._seleccionado = True
-        self._indicador.configure(bg=Colors.RED)
-        self._cuerpo.configure(bg=Colors.RED_LIGHT, highlightthickness=1, highlightbackground=Colors.RED)
-        self._label.configure(bg=Colors.RED_LIGHT, fg=Colors.RED, font=(FONT, 10, "bold"))
+        self._indicador.configure(bg=Colors.PRIMARY)
+        self._cuerpo.configure(bg=Colors.PRIMARY_LIGHT, highlightthickness=1, highlightbackground=Colors.PRIMARY_SOFT)
+        self._label.configure(bg=Colors.PRIMARY_LIGHT, fg=Colors.PRIMARY, font=(FONT, 11, "bold"))
+        self._badge.configure(bg=Colors.PRIMARY_LIGHT)
+        self._redibujar_icono()
 
     def deseleccionar(self) -> None:
         self._seleccionado = False
         self._indicador.configure(bg=Colors.WHITE)
         self._restaurar_normal()
-        self._label.configure(fg=Colors.GRAY_800, font=(FONT, 10))
+        self._label.configure(fg=Colors.TEXT_PRIMARY, font=(FONT, 11))
 
 
 class Sidebar(tk.Frame):
@@ -320,8 +346,8 @@ class Sidebar(tk.Frame):
         super().__init__(
             parent,
             bg=Colors.WHITE,
-            width=240,
-            highlightbackground=Colors.GRAY_300,
+            width=260,
+            highlightbackground=Colors.BORDER,
             highlightthickness=1,
         )
         self.grid_propagate(False)
@@ -329,7 +355,7 @@ class Sidebar(tk.Frame):
 
         header = tk.Frame(self, bg=Colors.WHITE)
         header.pack(fill=tk.X, padx=SPACE_LG, pady=(SPACE_LG, SPACE_MD))
-        tk.Label(header, text=titulo, bg=Colors.WHITE, fg=Colors.GRAY_600, font=(FONT, 9, "bold")).pack(anchor=tk.W)
+        tk.Label(header, text=titulo, bg=Colors.WHITE, fg=Colors.TEXT_MUTED, font=(FONT, 10, "bold")).pack(anchor=tk.W)
 
         self._nav = tk.Frame(self, bg=Colors.WHITE)
         self._nav.pack(fill=tk.BOTH, expand=True, padx=SPACE_SM, pady=(0, SPACE_LG))
