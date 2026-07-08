@@ -5,6 +5,46 @@ from domain.entidades.postulante import Postulante
 from infraestructura.utilidades.almacenamiento import guardar_json, leer_json, nuevo_id
 
 
+class ReporteMatriculasFormateador:
+    """Clase interna de soporte (SOLID: SRP) encargada exclusivamente de la presentación del reporte."""
+
+    @staticmethod
+    def construir_texto(
+        estudiantes: list,
+        docentes: list,
+        aulas: list,
+        cursos: list,
+        postulantes: list,
+        matriculas: list
+    ) -> str:
+        lineas = [
+            "===== REPORTE GENERAL ULEAM =====\n",
+            f"Estudiantes:  {len(estudiantes)}",
+            f"Docentes:     {len(docentes)}",
+            f"Aulas:        {len(aulas)}",
+            f"Cursos:       {len(cursos)}",
+            f"Postulantes:  {len(postulantes)}",
+            f"Matrículas:   {len(matriculas)}\n",
+            "===== MATRÍCULAS =====",
+        ]
+
+        est_map = {e.get("cedula"): e.get("nombre", "") for e in estudiantes}
+        cur_map = {c.get("id"): c.get("nombre", "") for c in cursos}
+        aul_map = {a.get("id"): a.get("codigo", "") for a in aulas}
+
+        if not matriculas:
+            lineas.append("No hay matrículas registradas.")
+        else:
+            for m in matriculas:
+                ced = m.get("cedula_estudiante", m.get("estudiante_id", ""))
+                cid = m.get("curso_id", m.get("id_curso", ""))
+                aid = m.get("aula_id", m.get("id_aula", ""))
+                lineas.append(
+                    f"- {est_map.get(ced, ced)} | {cur_map.get(cid, cid)} | Aula {aul_map.get(aid, aid)}"
+                )
+        return "\n".join(lineas)
+
+
 class MatriculaServicio:
     """Gestión de aulas, cursos, postulantes y matrículas (módulo rama Modulosss)."""
 
@@ -71,36 +111,12 @@ class MatriculaServicio:
         return [m for m in self.listar_matriculas() if m.cedula_estudiante == cedula]
 
     def generar_reporte(self) -> str:
-        estudiantes = leer_json("estudiantes")
-        docentes = leer_json("docentes")
-        aulas = leer_json("aulas")
-        cursos = leer_json("cursos")
-        postulantes = leer_json("postulantes")
-        matriculas = leer_json("matriculas")
-
-        lineas = [
-            "===== REPORTE GENERAL ULEAM =====\n",
-            f"Estudiantes:  {len(estudiantes)}",
-            f"Docentes:     {len(docentes)}",
-            f"Aulas:        {len(aulas)}",
-            f"Cursos:       {len(cursos)}",
-            f"Postulantes:  {len(postulantes)}",
-            f"Matrículas:   {len(matriculas)}\n",
-            "===== MATRÍCULAS =====",
-        ]
-
-        est_map = {e.get("cedula"): e.get("nombre", "") for e in estudiantes}
-        cur_map = {c.get("id"): c.get("nombre", "") for c in cursos}
-        aul_map = {a.get("id"): a.get("codigo", "") for a in aulas}
-
-        if not matriculas:
-            lineas.append("No hay matrículas registradas.")
-        else:
-            for m in matriculas:
-                ced = m.get("cedula_estudiante", m.get("estudiante_id", ""))
-                cid = m.get("curso_id", m.get("id_curso", ""))
-                aid = m.get("aula_id", m.get("id_aula", ""))
-                lineas.append(
-                    f"- {est_map.get(ced, ced)} | {cur_map.get(cid, cid)} | Aula {aul_map.get(aid, aid)}"
-                )
-        return "\n".join(lineas)
+        # Se delega la orquestación textual al formateador especializado sin mutar la respuesta externa
+        return ReporteMatriculasFormateador.construir_texto(
+            estudiantes=leer_json("estudiantes"),
+            docentes=leer_json("docentes"),
+            aulas=leer_json("aulas"),
+            cursos=leer_json("cursos"),
+            postulantes=leer_json("postulantes"),
+            matriculas=leer_json("matriculas")
+        )
