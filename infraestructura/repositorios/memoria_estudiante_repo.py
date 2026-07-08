@@ -3,7 +3,9 @@ from domain.interfaces.repositorio import IRepositorioEstudiante
 
 
 class RepositorioEstudianteMemoria(IRepositorioEstudiante):
-    """Implementación en memoria del repositorio de estudiantes."""
+    """POLIMORFISMO CON INTERFACES: implementación concreta del contrato
+    IRepositorioEstudiante, pero guardando todo en memoria (útil para pruebas)
+    en vez de JSON. El servicio que la usa no nota la diferencia."""
 
     def __init__(self) -> None:
         self._estudiantes: dict[str, Estudiante] = {}
