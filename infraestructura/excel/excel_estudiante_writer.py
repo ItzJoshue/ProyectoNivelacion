@@ -6,7 +6,9 @@ from domain.interfaces.exportador import IExportadorEstudiantes
 
 
 class ExcelExportadorEstudiantes(IExportadorEstudiantes):
-    """Exporta estudiantes a un archivo Excel (.xlsx)."""
+    """POLIMORFISMO CON INTERFACES: implementación concreta de
+    IExportadorEstudiantes. Convierte la lista de estudiantes en un archivo
+    .xlsx, sin que el código que la llama sepa que es Excel específicamente."""
 
     ENCABEZADOS = ("cedula", "nombre", "apellido", "carrera", "email", "promedio")
 
