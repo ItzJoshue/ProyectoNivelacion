@@ -6,10 +6,11 @@ from Vistas.ui.components import Card, SPACE_MD, button_row, form_field, page_he
 
 
 class CalificacionesFrame(ttk.Frame):
-     """Gestiona el registro y consulta de calificaciones académicas.
-        Permite asociar calificaciones a estudiantes y materias, así como
-        visualizar información relacionada con el rendimiento académico
-        dentro del sistema de gestión académica."""
+    """Gestiona el registro y consulta de calificaciones académicas.
+    Permite asociar calificaciones a estudiantes y materias, así como
+    visualizar información relacionada con el rendimiento académico
+    dentro del sistema de gestión académica."""
+
     def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
         self.contenedor = contenedor
