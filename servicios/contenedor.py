@@ -61,13 +61,13 @@ class ContenedorAplicacion:
         return self._autenticacion.iniciar_sesion(cedula, contrasena)
 
     def registrar_usuario(self, datos: dict, contrasena: str, rol: str) -> Usuario:
-         """Delegación a AutenticacionServicio: la Vista de registro no necesita
-            saber que existe ese servicio, solo llama al Facade."""
+        """Delegación a AutenticacionServicio: la Vista de registro no necesita
+        saber que existe ese servicio, solo llama al Facade."""
         return self._autenticacion.registrar(datos, contrasena, rol)
 
     def obtener_perfil_estudiante(self, cedula: str) -> Estudiante | None:
-         """Igual que arriba: oculta a la Vista que el perfil vive en
-            AutenticacionServicio y no en GestorAcademico."""
+        """Igual que arriba: oculta a la Vista que el perfil vive en
+        AutenticacionServicio y no en GestorAcademico."""
         return self._autenticacion.obtener_perfil_estudiante(cedula)
 
 
