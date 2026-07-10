@@ -14,9 +14,10 @@ from Vistas.ui.components import (
 
 
 class MatriculaFrame(ttk.Frame):
-     """Gestiona el proceso de matrícula de estudiantes.
-        Permite asignar estudiantes a cursos y aulas, así como consultar
-        las matrículas registradas dentro del sistema académico."""
+    """Gestiona el proceso de matrícula de estudiantes.
+    Permite asignar estudiantes a cursos y aulas, así como consultar
+    las matrículas registradas dentro del sistema académico."""
+
     def __init__(self, parent: tk.Widget, contenedor: ContenedorAplicacion) -> None:
         super().__init__(parent, style="Content.TFrame")
         self.contenedor = contenedor
@@ -80,9 +81,9 @@ class MatriculaFrame(ttk.Frame):
         self.refrescar()
 
     def cargar_listas(self) -> None:
-         """Carga la información necesaria para los controles de selección.
-            Obtiene estudiantes, cursos y aulas disponibles para que el usuario
-            pueda realizar nuevas matrículas desde la interfaz."""
+        """Carga la información necesaria para los controles de selección.
+        Obtiene estudiantes, cursos y aulas disponibles para que el usuario
+        pueda realizar nuevas matrículas desde la interfaz."""
         estudiantes = self.contenedor.gestor.listar_estudiantes()
         cursos = self.contenedor.matricula.listar_cursos()
         aulas = self.contenedor.matricula.listar_aulas()
@@ -92,9 +93,9 @@ class MatriculaFrame(ttk.Frame):
 
     @staticmethod
     def _id(texto: str) -> str:
-         """Extrae el identificador principal de una opción seleccionada.
-            Convierte el texto mostrado en los combobox en un identificador
-            utilizable por los servicios del sistema."""
+        """Extrae el identificador principal de una opción seleccionada.
+        Convierte el texto mostrado en los combobox en un identificador
+        utilizable por los servicios del sistema."""
         return texto.split("|")[0].strip() if texto else ""
 
     def _matricular(self) -> None:
